@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "module": "ESNext", // Usa "ESNext" para que funcione `import.meta`
+    "target": "ESNext",  // Asegúrate de usar ESNext o una versión compatible
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "baseUrl": "src",
+    "paths": {
+      "@app/*": ["app/*"]
+    }
+  },
+  "include": ["src"]
+}
