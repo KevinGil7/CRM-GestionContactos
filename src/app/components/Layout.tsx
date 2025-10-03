@@ -19,7 +19,8 @@ import {
 import { ChevronDownIcon, MagnifyingGlassIcon, ArrowLeftOnRectangleIcon } from '@heroicons/react/20/solid'
 import { Outlet } from 'react-router-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { navigation } from '../configs/navigation'
+import { navigation } from '../configs/navigation';
+import UseJwtAuth from '@auth/services/Jwt/UseJwtAuth';
 
 
 
@@ -40,24 +41,74 @@ function classNames(...classes: (string | boolean | undefined | null)[]): string
 export default function Layout({ children, hideSidebar = false }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [nombre, setNombre] = useState("");
-  const [roll, setRol] = useState("");
+  const [rol, setRol] = useState("");
   const location = useLocation();
-
-  // const rol = localStorage.getItem("rol");
   const navigate = useNavigate();
+  const { signOut } = UseJwtAuth();
+
   const handleSignOut = () => {
-    localStorage.clear();
+    signOut?.();
     navigate('/');
   };
 
   const isCurrent = (href: string) => location.pathname === href;
 
 useEffect(() => {
-
-  const storedNombre = localStorage.getItem("nombre");
-  const storedRol = localStorage.getItem("rol");
+  const storedNombre = localStorage.getItem("user_username");
+  const storedRoles = localStorage.getItem("user_roles");
+  const storedToken = localStorage.getItem("jwt_access_token");
+  
+  console.log('Layout useEffect - storedNombre:', storedNombre);
+  console.log('Layout useEffect - storedRoles:', storedRoles);
+  console.log('Layout useEffect - storedToken:', storedToken ? 'Token exists' : 'No token');
+  
+  // Si no hay roles pero hay token, intentar decodificar el token
+  if (!storedRoles && storedToken) {
+    try {
+      const tokenParts = storedToken.split('.');
+      if (tokenParts.length === 3) {
+        const payload = tokenParts[1];
+        const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
+        const decodedPayload = atob(paddedPayload);
+        const payloadObj = JSON.parse(decodedPayload);
+        const rolesFromToken = payloadObj['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || ['Administrator'];
+        console.log('Layout useEffect - Decoded roles from token:', rolesFromToken);
+        
+        // Guardar los roles en localStorage
+        localStorage.setItem('user_roles', JSON.stringify(rolesFromToken));
+        const selectedRole = rolesFromToken.includes("Administrator") ? "Administrator" : rolesFromToken[0];
+        setRol(selectedRole);
+        console.log('Layout useEffect - Set rol from token:', selectedRole);
+      }
+    } catch (error) {
+      console.error('Layout useEffect - Error decoding token:', error);
+    }
+  }
+  
   if (storedNombre) setNombre(storedNombre);
-  if (storedRol) setRol(storedRol);
+  if (storedRoles) {
+    try {
+      const rolesArray = JSON.parse(storedRoles);
+      console.log('Layout useEffect - rolesArray:', rolesArray);
+      
+      // Priorizar Administrator si está presente, sino tomar el primer rol
+      let selectedRole = "User";
+      if (rolesArray.includes("Administrator")) {
+        selectedRole = "Administrator";
+      } else if (rolesArray.length > 0) {
+        selectedRole = rolesArray[0];
+      }
+      
+      console.log('Layout useEffect - setting rol to:', selectedRole);
+      setRol(selectedRole);
+    } catch (error) {
+      console.error('Layout useEffect - error parsing roles:', error);
+      setRol("User");
+    }
+  } else {
+    console.log('Layout useEffect - no storedRoles found, setting default User');
+    setRol("User");
+  }
 }, []);
 
  return (
@@ -95,20 +146,54 @@ useEffect(() => {
                   <li>
                     <ul role="list" className="-mx-2 space-y-1">
                       {navigation
-                        .filter((item) => item.roles.includes(roll!))
+                        .filter((item) => {
+                          console.log('Mobile - Checking item:', item.name, 'user rol:', rol, 'item roles:', item.roles, 'includes result:', item.roles.includes(rol!));
+                          return item.roles.includes(rol!);
+                        })
                         .map((item) => (
                           <li key={item.name}>
-                            <Link to={item.href!}
-                              className={classNames(
-                                isCurrent(item.href!)
-                                  ? 'bg-gray-800 text-white'
-                                  : 'text-gray-400 hover:bg-gray-800 hover:text-white',
-                                'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
-                              )}
-                            >
-                              <item.icon aria-hidden="true" className="size-6 shrink-0" />
-                              {item.name}
-                            </Link>
+                            {item.children ? (
+                              <details className="group">
+                                <summary
+                                  className={classNames(
+                                    'flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white cursor-pointer'
+                                  )}
+                                >
+                                  <item.icon className="size-6 shrink-0" />
+                                  {item.name}
+                                  <ChevronDownIcon className="ml-auto size-4 text-gray-400 group-open:rotate-180 transition-transform" />
+                                </summary>
+                                <ul className="pl-8 mt-1 space-y-1">
+                                  {item.children.map((child) => (
+                                    <li key={child.name}>
+                                      <Link
+                                        to={child.href}
+                                        className={classNames(
+                                          isCurrent(child.href)
+                                            ? 'bg-gray-800 text-white'
+                                            : 'text-gray-400 hover:bg-gray-800 hover:text-white',
+                                          'block rounded-md p-2 text-sm/6 font-medium'
+                                        )}
+                                      >
+                                        {child.name}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </details>
+                            ) : (
+                              <Link to={item.href!}
+                                className={classNames(
+                                  isCurrent(item.href!)
+                                    ? 'bg-gray-800 text-white'
+                                    : 'text-gray-400 hover:bg-gray-800 hover:text-white',
+                                  'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
+                                )}
+                              >
+                                <item.icon aria-hidden="true" className="size-6 shrink-0" />
+                                {item.name}
+                              </Link>
+                            )}
                           </li>
                         ))}
                     </ul>
@@ -130,7 +215,10 @@ useEffect(() => {
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
               <li>
                 <ul role="list" className="-mx-2 space-y-1">
-                  {navigation.filter((item) => item.roles.includes(roll!))
+                  {navigation.filter((item) => {
+                      console.log('Desktop - Checking item:', item.name, 'user rol:', rol, 'item roles:', item.roles, 'includes result:', item.roles.includes(rol!));
+                      return item.roles.includes(rol!);
+                    })
                     .map((item) => (
                       <li key={item.name}>
                         {item.children ? (
@@ -210,7 +298,7 @@ useEffect(() => {
                 <UserIcon className="w-8 h-8 text-gray-500" />
                 <div className="text-left">
                   <p className="text-sm font-medium text-gray-900">{nombre}</p>
-                  <p className="text-xs text-gray-500">{roll}</p>
+                  <p className="text-xs text-gray-500">{rol}</p>
                 </div>
               </Menu.Button>
               <MenuItems

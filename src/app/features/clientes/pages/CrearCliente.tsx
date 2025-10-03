@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { createCliente, ServiceResponse } from '../services/Cliente.service';
 import { CreateCliente } from '../types/CreateCliente';
-import { getEmpresas } from '../../empresas/services/Empresa.service';
-import { Empresa } from '../../empresas/types/Empresa';
+import { getProveedores } from '../../empresas/services/proveedor.service';
+import { Proveedor } from '../../empresas/types/Proveedor';
 import { toast } from 'react-hot-toast';
 
 const CrearCliente: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [empresas, setEmpresas] = useState<Proveedor[]>([]);
   const [perteneceEmpresa, setPerteneceEmpresa] = useState(false);
   const [formData, setFormData] = useState<CreateCliente>({
     primerNombre: '',
@@ -31,7 +31,7 @@ const CrearCliente: React.FC = () => {
 
   const loadEmpresas = async () => {
     try {
-      const response = await getEmpresas();
+      const response = await getProveedores();
       if (response.success && response.data) {
         setEmpresas(response.data);
       } else if (response.error) {

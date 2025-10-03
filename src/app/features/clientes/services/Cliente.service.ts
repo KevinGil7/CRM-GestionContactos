@@ -14,6 +14,7 @@ export interface ServiceResponse<T> {
 export const getClientes = async (): Promise<ServiceResponse<ClienteEmpresa[]>> => {
     try {
         const { data } = await api.get<ClienteEmpresa[]>(`/Cliente`);
+        
         return {
             success: true,
             data: data

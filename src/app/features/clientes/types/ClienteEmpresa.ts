@@ -1,4 +1,4 @@
-import { EmpresaC } from "app/features/empresas/types/EmpresaC";
+import { EmpresaC } from "@app/features/empresas/types/ProveedorC";
 
 export interface ClienteEmpresa{
      id : string;

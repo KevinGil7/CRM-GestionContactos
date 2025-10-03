@@ -1,4 +1,4 @@
-import { EmpresaBy } from "app/features/empresas/types/EmpresaBy";
+import { EmpresaBy } from "@app/features/empresas/types/ProveedorBy";
 
 export interface ClienteBy{
     id : string;

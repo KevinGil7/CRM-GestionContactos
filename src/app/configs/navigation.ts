@@ -3,14 +3,14 @@ import { HomeIcon, UsersIcon, BuildingOffice2Icon, Cog6ToothIcon    } from '@her
 import { FileDown, HandCoins, HandshakeIcon, PiggyBank, ChartNoAxesCombined    } from "lucide-react";
 
 export const navigation = [
-  { name: 'Home', href: '/home', icon: HomeIcon, current: true, roles: ['User', 'Admin'] },
-  { name: 'Clientes', href: '/home/clientes', icon: UsersIcon, current: false, roles: ['User', 'Admin'] },
-  { name: 'Empresa', href: '/home/empresas', icon: BuildingOffice2Icon, current: false, roles: ['User', 'Admin'] },
+  { name: 'Home', href: '/home', icon: HomeIcon, current: true, roles: ['User', 'Administrator'] },
+  { name: 'Clientes', href: '/home/clientes', icon: UsersIcon, current: false, roles: ['User', 'Administrator'] },
+  { name: 'Proveedores', href: '/home/proveedores', icon: BuildingOffice2Icon, current: false, roles: ['User', 'Administrator'] },
  
   {
     name: 'Administración',
     icon: Cog6ToothIcon,
-    roles: ['Admin'],
+    roles: ['Administrator'],
     children: [
       { name: 'Usuarios', href: '/home/admin/usuarios' },
     ],

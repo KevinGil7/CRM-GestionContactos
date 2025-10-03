@@ -8,7 +8,9 @@ export default defineConfig({
   plugins: [react(), tailwindcss() ],
   resolve: {
     alias: {
-      '@app': path.resolve(__dirname, 'src/app'), // Asegúrate que __dirname esté definido
+      '@app': path.resolve(__dirname, 'src/app'),
+      '@auth': path.resolve(__dirname, 'src/@auth'),
+      '@fuse': path.resolve(__dirname, 'src/@fuse'), // Asegúrate que __dirname esté definido
     },
   },
 })

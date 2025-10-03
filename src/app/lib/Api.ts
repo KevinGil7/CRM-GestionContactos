@@ -25,6 +25,11 @@ interface BackendErrorResponse {
   traceId?: string;
 }
 
+// Función para obtener el token del localStorage
+function getTokenStorageValue(): string | null {
+  return localStorage.getItem('jwt_access_token');
+}
+
 const api = axios.create({
   baseURL: apiUrl, // Ajusta según tu backend
   headers: {
@@ -32,9 +37,28 @@ const api = axios.create({
   },
 });
 
+// Interceptor para agregar el token de autorización a cada request
+api.interceptors.request.use(
+  (config) => {
+    const token = getTokenStorageValue();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Interceptor para manejar respuestas y errores
 api.interceptors.response.use(
   (response: AxiosResponse) => {
+    // Verificar si hay un nuevo token en los headers de respuesta
+    const newToken = response.headers['new-access-token'] || response.headers['New-Access-Token'];
+    if (newToken) {
+      localStorage.setItem('jwt_access_token', newToken);
+    }
     return response;
   },
   (error: AxiosError) => {
@@ -102,6 +126,20 @@ api.interceptors.response.use(
         };
       }
       
+      // Si es un error 401 (no autorizado), limpiar el token y redirigir al login
+      if (status === 401) {
+        localStorage.removeItem('jwt_access_token');
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('user_email');
+        localStorage.removeItem('user_username');
+        localStorage.removeItem('user_roles');
+        
+        // Opcional: redirigir al login si estás en el navegador
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+      }
+      
       // Crear error estructurado
       const structuredError: ErrorResponse = {
         error: backendError,
@@ -144,3 +182,4 @@ function getErrorTypeFromStatus(status: number): BackendError['type'] {
 }
 
 export default api;
+

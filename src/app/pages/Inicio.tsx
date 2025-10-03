@@ -1,8 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { navigation } from '@app/configs/navigation';
 
-const userRole = 'User';
-
 declare module 'react' {
   interface StyleHTMLAttributes<T> extends React.HTMLAttributes<T> {
     jsx?: boolean;
@@ -13,6 +11,28 @@ declare module 'react' {
 export default function Inicio() {
   const navigate = useNavigate();
 
+  // Obtener el rol del usuario desde localStorage
+  const getUserRole = () => {
+    const storedRoles = localStorage.getItem("user_roles");
+    if (storedRoles) {
+      try {
+        const rolesArray = JSON.parse(storedRoles);
+        // Priorizar Administrator si está presente, sino tomar el primer rol
+        if (rolesArray.includes("Administrator")) {
+          return "Administrator";
+        } else if (rolesArray.length > 0) {
+          return rolesArray[0];
+        }
+        return "User";
+      } catch {
+        return "User";
+      }
+    }
+    return "User";
+  };
+
+  const userRole = getUserRole();
+
   const dashboardItems = navigation.filter(
     (item) =>
       item.name !== 'Home' &&
@@ -21,7 +41,7 @@ export default function Inicio() {
       (item.roles.includes(userRole) || !item.roles)
   );
 
-  const nombre = localStorage.getItem("nombre") ?? "Usuario";
+  const username = localStorage.getItem("user_username") ?? "Usuario";
 
   return (
     <div className="p-6 relative overflow-hidden h-full">
@@ -41,7 +61,7 @@ export default function Inicio() {
       {/* Contenido principal */}
       <div className="relative z-10 h-full flex flex-col">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-800">Bienvenido, {nombre}</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Bienvenido, {username}</h2>
           <p className="text-gray-600">Selecciona una opción para continuar:</p>
         </div>
 

@@ -5,8 +5,8 @@ import { ClienteCompleto } from '../types/ClienteCompleto';
 import { ClienteBy } from '../types/ClienteBy';
 import { ConfirmModal } from "../../../components/ui/ConfirmModalProps";
 import { UpdateCliente } from '../types/CreateCliente';
-import { getEmpresas, getEmpresaBy } from '../../empresas/services/Empresa.service';
-import { Empresa } from '../../empresas/types/Empresa';
+import { getProveedores, getProveedorBy } from '../../empresas/services/proveedor.service';
+import { Proveedor } from '../../empresas/types/Proveedor';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import {toast} from 'react-hot-toast';
@@ -21,7 +21,7 @@ const ClienteDetalle: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [empresas, setEmpresas] = useState<Proveedor[]>([]);
   const [empresaActual, setEmpresaActual] = useState<string>('');
   
 
@@ -33,7 +33,7 @@ const ClienteDetalle: React.FC = () => {
   }, [id]);
 
   const loadEmpresas = async () => {
-    const response = await getEmpresas();
+    const response = await getProveedores();
     if (response.success && response.data) {
       setEmpresas(response.data);
     }
@@ -55,7 +55,7 @@ const ClienteDetalle: React.FC = () => {
       
       // Cargar información de la empresa actual
       if (empresaId) {
-        const empresaResponse = await getEmpresaBy(empresaId);
+        const empresaResponse = await getProveedorBy(empresaId);
         if (empresaResponse.success && empresaResponse.data) {
           setEmpresaActual(empresaResponse.data.name);
         }
@@ -156,7 +156,7 @@ const ClienteDetalle: React.FC = () => {
 
         // Actualizar empresa actual
         if (empresaId) {
-          const empresaResponse = await getEmpresaBy(empresaId);
+          const empresaResponse = await getProveedorBy(empresaId);
           if (empresaResponse.success && empresaResponse.data) {
             setEmpresaActual(empresaResponse.data.name);
           }
@@ -168,7 +168,7 @@ const ClienteDetalle: React.FC = () => {
         // significa que se seleccionó una empresa pero no se guardó correctamente
         if (!empresaId && formData.empresaId) {
           // Buscar la empresa por el ID del formData
-          const empresaResponse = await getEmpresas();
+          const empresaResponse = await getProveedores();
           if (empresaResponse.success && empresaResponse.data) {
             const empresaSeleccionada = empresaResponse.data.find(e => e.id.toString() === formData.empresaId);
             if (empresaSeleccionada) {

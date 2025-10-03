@@ -1,23 +1,28 @@
 import '../App.css'
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { Home} from './pages';
 import { useEffect } from 'react';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRouter';
-import Login from './features/auth/pages/Login';
+import Login from '../@auth/services/pages/Login';
 import ClienteAll from './features/clientes/pages/ClienteAll';
 import ClienteDetalle from './features/clientes/pages/ClienteDetalle';
 import CrearCliente from './features/clientes/pages/CrearCliente';
 import Inicio from './pages/Inicio';
-import EmpresaAll from './features/empresas/pages/EmpresaAll';
-import EmpresaDetalle from './features/empresas/pages/EmpresaDetalle';
-import CrearEmpresa from './features/empresas/pages/CrearEmpresa';
+import ProveedorAll from './features/empresas/pages/ProveedorAll';
+import ProveedorDetalle from './features/empresas/pages/ProveedorDetalle';
+import CrearProveedor from './features/empresas/pages/CrearProveedor';
 import { Toaster } from "react-hot-toast";
+import useAuth from '@fuse/core/FuseAuthProvider/useAuth';
 
 
 
 function AppRoutes() {
   const location = useLocation();
+  const { authState } = useAuth();
+  
+  const isAuthenticated = authState?.isAuthenticated || false;
+  const authStatus = authState?.authStatus || 'unauthenticated';
 
   useEffect(() => {
     const path = location.pathname;
@@ -28,9 +33,23 @@ function AppRoutes() {
     }
   }, [location]);
 
- return (
+  // Show loading while authentication is being determined
+  if (authStatus === 'configuring') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="loader"></div>
+      </div>
+    );
+  }
+
+  return (
     <Routes>
-      <Route path="/" element={<Login />} />
+      <Route 
+        path="/" 
+        element={
+          isAuthenticated ? <Navigate to="/home" replace /> : <Login />
+        } 
+      />
       <Route path="/home" element={
         <PrivateRoute>
           <Layout hideSidebar={location.pathname === '/home' || location.pathname === '/home/'} />
@@ -40,11 +59,17 @@ function AppRoutes() {
         <Route path="clientes" element={<ClienteAll />} />
         <Route path="clientes/crear" element={<CrearCliente />} />
         <Route path="clientes/:id" element={<ClienteDetalle />} />
-        <Route path="empresas" element={<EmpresaAll />} />
-        <Route path="empresas/:id" element={<EmpresaDetalle />} />
-        <Route path="empresas/crear" element={<CrearEmpresa />} />
-
+        <Route path="proveedores" element={<ProveedorAll />} />
+        <Route path="proveedores/:id" element={<ProveedorDetalle />} />
+        <Route path="proveedores/crear" element={<CrearProveedor />} />
       </Route>
+      {/* Catch all route - redirect to home if authenticated, otherwise to login */}
+      <Route 
+        path="*" 
+        element={
+          <Navigate to={isAuthenticated ? "/home" : "/"} replace />
+        } 
+      />
     </Routes>
   );
 }
