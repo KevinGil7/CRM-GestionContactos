@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createProveedor } from "../services/proveedor.service";
-import { getClientes } from "../../clientes/services/Cliente.service";
+import { getContactos } from "../../contactos/services/Contacto.service";
 import { CreateProveedor } from "../types/CreateProveedor";
-import { ClienteEmpresa } from "../../clientes/types/ClienteEmpresa";
+import { Contacto } from "../../contactos/types/Contacto";
 import { User, Building2, Save, ArrowLeft } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { Link } from "react-router-dom";
@@ -16,7 +16,7 @@ const CrearProveedor: React.FC = () => {
     contactoPrincipal: undefined,
   });
   const [loading, setLoading] = useState(false);
-  const [clientes, setClientes] = useState<ClienteEmpresa[]>([]);
+  const [clientes, setClientes] = useState<Contacto[]>([]);
   const [clientePrincipalId, setClientePrincipalId] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -26,7 +26,7 @@ const CrearProveedor: React.FC = () => {
 
   const loadClientes = async () => {
     try {
-      const response = await getClientes();
+      const response = await getContactos();
       if (response.success && response.data) {
         setClientes(response.data);
       } else if (response.error) {

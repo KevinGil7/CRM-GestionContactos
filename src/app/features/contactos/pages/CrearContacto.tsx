@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { createCliente, ServiceResponse } from '../services/Cliente.service';
-import { CreateCliente } from '../types/CreateCliente';
-import { getProveedores } from '../../empresas/services/proveedor.service';
-import { Proveedor } from '../../empresas/types/Proveedor';
+import { createContacto, ServiceResponse } from '../services/Contacto.service';
+import { CreateContacto } from '../types/CreateContacto';
+import { getProveedores } from '../../provedores/services/proveedor.service';
+import { Proveedor } from '../../provedores/types/Proveedor';
 import { toast } from 'react-hot-toast';
 
 const CrearCliente: React.FC = () => {
@@ -12,17 +12,16 @@ const CrearCliente: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [empresas, setEmpresas] = useState<Proveedor[]>([]);
   const [perteneceEmpresa, setPerteneceEmpresa] = useState(false);
-  const [formData, setFormData] = useState<CreateCliente>({
+  const [formData, setFormData] = useState<CreateContacto>({
     primerNombre: '',
     segundoNombre: '',
     primerApellido: '',
     segundoApellido: '',
     dpi: 0,
-    nit: 0,
+    fecha_Nacimiento: new Date(),
     telefono: '',
     direccion: '',
     correo: '',
-    empresaId: null,
   });
 
   useEffect(() => {
@@ -72,7 +71,7 @@ const CrearCliente: React.FC = () => {
     setError(null);
 
     try {
-      const response: ServiceResponse<any> = await createCliente(formData);
+      const response: ServiceResponse<any> = await createContacto(formData);
 
       if (response.success) {
         toast.success('Cliente creado exitosamente');
@@ -85,8 +84,8 @@ const CrearCliente: React.FC = () => {
       }
     } catch (err) {
       console.error('Error al crear cliente:', err);
-      setError('Ocurrió un error inesperado al crear el cliente');
-      toast.error('Ocurrió un error inesperado al crear el cliente');
+      setError('Ocurrió un error inesperado al crear el contacto');
+      toast.error('Ocurrió un error inesperado al crear el contacto');
     } finally {
       setLoading(false);
     }
@@ -97,7 +96,7 @@ const CrearCliente: React.FC = () => {
       formData.primerNombre.trim() !== '' &&
       formData.primerApellido.trim() !== '' &&
       formData.dpi !== 0 &&
-      formData.nit !== 0 &&
+      formData.fecha_Nacimiento !== new Date() &&
       formData.telefono.trim() !== '' &&
       formData.correo.trim() !== '' &&
       formData.direccion.trim() !== ''
@@ -112,7 +111,7 @@ const CrearCliente: React.FC = () => {
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <Link
-                to="/home/clientes"
+                to="/home/contactos"
                 className="mr-4 p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +119,7 @@ const CrearCliente: React.FC = () => {
                 </svg>
               </Link>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Crear Nuevo Cliente</h1>
+                <h1 className="text-3xl font-bold text-gray-900">Crear Nuevo Contacto</h1>
                 <p className="mt-1 text-sm text-gray-500">Completa la información del cliente</p>
               </div>
             </div>
@@ -141,7 +140,7 @@ const CrearCliente: React.FC = () => {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">Error al crear cliente</h3>
+                    <h3 className="text-sm font-medium text-red-800">Error al crear contacto</h3>
                     <div className="mt-2 text-sm text-red-700">
                       <p>{error}</p>
                     </div>
@@ -227,15 +226,15 @@ const CrearCliente: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="nit" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="fecha_Nacimiento" className="block text-sm font-medium text-gray-700">
                     Nit *
                   </label>
                   <input
-                    type="text"
-                    name="nit"
-                    id="nit"
+                    type="date"
+                    name="fecha_Nacimiento"
+                    id="fecha_Nacimiento"
                     required
-                    value={formData.nit}
+                    value={formData.fecha_Nacimiento.toISOString().split('T')[0]}
                     onChange={handleInputChange}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -329,31 +328,7 @@ const CrearCliente: React.FC = () => {
               </div>
 
               {/* Selector de empresa (solo visible si pertenece a empresa) */}
-              {perteneceEmpresa && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <label htmlFor="empresaId" className="block text-sm font-medium text-blue-800 mb-2">
-                    Seleccionar Empresa *
-                  </label>
-                  <select
-                    name="empresaId"
-                    id="empresaId"
-                    required={perteneceEmpresa}
-                    value={formData.empresaId || ''}
-                    onChange={handleInputChange}
-                    className="block w-full border border-blue-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white"
-                  >
-                    <option value="">Selecciona una empresa</option>
-                    {empresas.map((empresa) => (
-                      <option key={empresa.id} value={empresa.id}>
-                        {empresa.name}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="mt-2 text-sm text-blue-600">
-                    Selecciona la empresa a la que pertenece este cliente
-                  </p>
-                </div>
-              )}
+             
 
               {/* Mensaje cuando no pertenece a empresa */}
               {!perteneceEmpresa && (
@@ -373,28 +348,24 @@ const CrearCliente: React.FC = () => {
             {/* Botones */}
             <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
               <Link
-                to="/home/clientes"
+                to="/home/contactos"
                 className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Cancelar
               </Link>
-              <button
-                type="submit"
-                disabled={!isFormValid() || loading || (perteneceEmpresa && !formData.empresaId)}
-                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+              
                 {loading ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                     Creando...
                   </div>
                 ) : (
-                  'Crear Cliente'
+                  'Crear Contacto'
                 )}
-              </button>
+              
             </div>
           </form>
-        </div>
+        </div>  
       </div>
     </div>
   );

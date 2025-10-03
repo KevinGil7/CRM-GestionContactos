@@ -1,26 +1,24 @@
-export interface CreateCliente {
+export interface CreateContacto {
      primerNombre: string;
      segundoNombre: string;
      primerApellido: string;
      segundoApellido: string;
      dpi : number;
-     nit : number;
      telefono: string;
      direccion: string;
      correo: string;
-     empresaId ? :string | null;
+     fecha_Nacimiento: Date;
 }
 
-export interface UpdateCliente{
+export interface UpdateContacto{
      id : string;
      primerNombre: string;
      segundoNombre: string;
      primerApellido: string;
      segundoApellido: string;
      dpi : number;
-     nit : number;
      telefono: string;
      direccion: string;
      correo: string;
-     empresaId?:string | null;
+     fecha_Nacimiento: Date;
 }

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getProveedorBy, updateProveedor, deleteProveedor } from "../services/proveedor.service";
-import { getClientes } from "../../clientes/services/Cliente.service";
+import { getContactos } from "../../contactos/services/Contacto.service";
 import { ProveedorBy } from "../types/ProveedorBy";
-import { ClienteEmpresa } from "../../clientes/types/ClienteEmpresa";
+import { Contacto } from "../../contactos/types/Contacto";
 import { motion } from "framer-motion";
 import { ConfirmModal } from "../../../components/ui/ConfirmModalProps";
 import { Save, Trash2, CornerDownLeft, User, Building2 } from "lucide-react";
@@ -15,7 +15,7 @@ const ProveedorDetalle: React.FC = () => {
   const [empresa, setEmpresa] = useState<ProveedorBy | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [clientes, setClientes] = useState<ClienteEmpresa[]>([]);
+  const [clientes, setClientes] = useState<Contacto[]>([]);
   const [clientePrincipalId, setClientePrincipalId] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -27,7 +27,7 @@ const ProveedorDetalle: React.FC = () => {
         // Cargar empresa y clientes en paralelo
         const [empresaResponse, clientesResponse] = await Promise.all([
           getProveedorBy(id),
-          getClientes()
+          getContactos()
         ]);
 
         if (empresaResponse.success && empresaResponse.data) {

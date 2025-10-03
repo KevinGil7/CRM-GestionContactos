@@ -1,8 +1,8 @@
 import api, { ErrorResponse } from "../../../lib/Api";
-import { ClienteEmpresa } from "../types/ClienteEmpresa";
-import { ClienteBy } from "../types/ClienteBy";
-import { CreateCliente, UpdateCliente } from "../types/CreateCliente";
-import { ClienteCompleto } from "../types/ClienteCompleto";
+import { ContactoBy } from "../types/ContactoBy";
+import { CreateContacto, UpdateContacto } from "../types/CreateContacto";
+import { Contacto } from "../types/Contacto";
+import { ContactoCompleto } from "../types/ContactoCompleto";
 
 // Interfaz para respuestas del servicio
 export interface ServiceResponse<T> {
@@ -11,9 +11,9 @@ export interface ServiceResponse<T> {
   error?: ErrorResponse;
 }
 
-export const getClientes = async (): Promise<ServiceResponse<ClienteEmpresa[]>> => {
+export const getContactos = async (): Promise<ServiceResponse<Contacto[]>> => {
     try {
-        const { data } = await api.get<ClienteEmpresa[]>(`/Cliente`);
+        const { data } = await api.get<Contacto[]>(`/Contacto`);
         
         return {
             success: true,
@@ -28,9 +28,9 @@ export const getClientes = async (): Promise<ServiceResponse<ClienteEmpresa[]>> 
     }
 };
 
-export const getClienteById = async (IdCliente: string): Promise<ServiceResponse<ClienteBy>> => {
+export const getContactoById = async (IdContacto: string): Promise<ServiceResponse<ContactoBy>> => {
     try {
-        const { data } = await api.get<ClienteBy>(`/Cliente/${IdCliente}`);
+        const { data } = await api.get<ContactoBy>(`/Contacto/${IdContacto}`);
         return {
             success: true,
             data: data
@@ -43,9 +43,9 @@ export const getClienteById = async (IdCliente: string): Promise<ServiceResponse
     }
 };
 
-export const createCliente = async (cliente: CreateCliente): Promise<ServiceResponse<ClienteEmpresa>> => {
+export const createContacto = async (contacto: CreateContacto): Promise<ServiceResponse<Contacto>> => {
     try {
-        const { data } = await api.post<ClienteEmpresa>(`/Cliente`, cliente);
+        const { data } = await api.post<Contacto>(`/Contacto`, contacto);
         return {
             success: true,
             data: data
@@ -58,9 +58,9 @@ export const createCliente = async (cliente: CreateCliente): Promise<ServiceResp
     }
 };
 
-export const updateCliente = async ( cliente: Partial<UpdateCliente>): Promise<ServiceResponse<ClienteCompleto>> => {
+export const updateContacto = async ( contacto: Partial<UpdateContacto>): Promise<ServiceResponse<ContactoCompleto>> => {
     try {
-        const { data } = await api.put<ClienteCompleto>(`/Cliente`, cliente);
+        const { data } = await api.put<ContactoCompleto>(`/Contacto`, contacto);
         return {
             success: true,
             data: data
@@ -73,9 +73,9 @@ export const updateCliente = async ( cliente: Partial<UpdateCliente>): Promise<S
     }
 };
 
-export const deleteCliente = async (id: string): Promise<ServiceResponse<ClienteEmpresa>> => {
+export const deleteContacto = async (id: string): Promise<ServiceResponse<Contacto>> => {
     try {
-        const { data } = await api.delete(`/Cliente/${id}`);
+        const { data } = await api.delete(`/Contacto/${id}`);
         return {
             success: true,
             data: data

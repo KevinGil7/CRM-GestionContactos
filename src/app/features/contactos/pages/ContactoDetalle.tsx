@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getClienteById, updateCliente, deleteCliente, ServiceResponse } from '../services/Cliente.service';
-import { ClienteCompleto } from '../types/ClienteCompleto';
-import { ClienteBy } from '../types/ClienteBy';
+import { getContactoById, updateContacto, deleteContacto, ServiceResponse } from '../services/Contacto.service';
+import { ContactoCompleto } from '../types/ContactoCompleto';
+import { ContactoBy } from '../types/ContactoBy';
 import { ConfirmModal } from "../../../components/ui/ConfirmModalProps";
-import { UpdateCliente } from '../types/CreateCliente';
-import { getProveedores, getProveedorBy } from '../../empresas/services/proveedor.service';
-import { Proveedor } from '../../empresas/types/Proveedor';
+import { UpdateContacto } from '../types/CreateContacto';
+import { getProveedores, getProveedorBy } from '../../provedores/services/proveedor.service';
+import { Proveedor } from '../../provedores/types/Proveedor';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import {toast} from 'react-hot-toast';
@@ -14,8 +14,8 @@ import {toast} from 'react-hot-toast';
 const ClienteDetalle: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [cliente, setCliente] = useState<ClienteCompleto | null>(null);
-  const [formData, setFormData] = useState<Partial<UpdateCliente>>({});
+  const [cliente, setCliente] = useState<ContactoCompleto | null>(null);
+  const [formData, setFormData] = useState<Partial<UpdateContacto>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,14 +44,14 @@ const ClienteDetalle: React.FC = () => {
     setLoading(true);
     setError(null);
 
-    const response: ServiceResponse<ClienteBy> = await getClienteById(id);
+    const response: ServiceResponse<ContactoBy> = await getContactoById(id);
 
     if (response.success && response.data) {
-      setCliente(response.data as unknown as ClienteCompleto);
+      setCliente(response.data as unknown as ContactoCompleto);
       console.log(response.data);
       
       // Obtener el ID de empresa de manera consistente
-      const empresaId = response.data.empresaId?.id ;
+      const empresaId = response.data.proveedorId?.id ;
       
       // Cargar información de la empresa actual
       if (empresaId) {
@@ -68,12 +68,10 @@ const ClienteDetalle: React.FC = () => {
         primerApellido: response.data.primerApellido,
         segundoApellido: response.data.segundoApellido,
         dpi: response.data.dpi,
-        nit: response.data.nit,
+        fecha_Nacimiento: response.data.fecha_Nacimiento,
         correo: response.data.correo,
         direccion: response.data.direccion,
         telefono: response.data.telefono,
-        // Convertir a string para consistencia con el select
-        empresaId: empresaId ? empresaId.toString() : null,
       });
     } else if (response.error) {
       setError(response.error.error.message);
@@ -82,16 +80,41 @@ const ClienteDetalle: React.FC = () => {
     setLoading(false);
   };
 
-  const handleChange = (field: keyof UpdateCliente, value: any) => {
+  const handleChange = (field: keyof UpdateContacto, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const hasChanges = () => {
     if (!cliente) return false;
     
-    // Obtener el ID de empresa original de manera consistente
-    const originalEmpresaId = cliente.EmpresaDto?.id 
-    const originalEmpresaIdStr = originalEmpresaId ? originalEmpresaId.toString() : null;
+    // Función para comparar fechas
+    const compareDates = (date1: any, date2: any) => {
+      if (!date1 && !date2) return true;
+      if (!date1 || !date2) return false;
+      
+      let d1: Date, d2: Date;
+      
+      // Convertir date1 a Date
+      if (date1 instanceof Date) {
+        d1 = date1;
+      } else if (typeof date1 === 'string') {
+        d1 = new Date(date1);
+      } else {
+        return false;
+      }
+      
+      // Convertir date2 a Date
+      if (date2 instanceof Date) {
+        d2 = date2;
+      } else if (typeof date2 === 'string') {
+        d2 = new Date(date2);
+      } else {
+        return false;
+      }
+      
+      // Comparar solo la fecha (sin hora)
+      return d1.toDateString() === d2.toDateString();
+    };
     
     return (
       formData.primerNombre !== cliente.primerNombre ||
@@ -99,11 +122,10 @@ const ClienteDetalle: React.FC = () => {
       formData.primerApellido !== cliente.primerApellido ||
       formData.segundoApellido !== cliente.segundoApellido ||
       formData.dpi !== cliente.dpi ||
-      formData.nit !== cliente.nit ||
+      !compareDates(formData.fecha_Nacimiento, cliente.fecha_Nacimiento) ||
       formData.correo !== cliente.correo ||
       formData.telefono !== cliente.telefono ||
-      formData.direccion !== cliente.direccion ||
-      formData.empresaId !== originalEmpresaIdStr
+      formData.direccion !== cliente.direccion 
     );
   };
 
@@ -113,22 +135,30 @@ const ClienteDetalle: React.FC = () => {
     setError(null);
 
     try {
-      const updateData: Partial<UpdateCliente> = {
+      // Preparar la fecha para enviar al backend
+      let fechaNacimiento = formData.fecha_Nacimiento;
+      if (fechaNacimiento instanceof Date) {
+        // Si es un objeto Date, enviarlo tal como está (el backend lo manejará)
+        fechaNacimiento = fechaNacimiento;
+      } else if (typeof fechaNacimiento === 'string') {
+        // Si es una string, convertirla a Date
+        fechaNacimiento = new Date(fechaNacimiento);
+      }
+
+      const updateData: Partial<UpdateContacto> = {
         id: formData.id || "",
         primerNombre: formData.primerNombre || "",
         segundoNombre: formData.segundoNombre || "",
         primerApellido: formData.primerApellido || "",
         segundoApellido: formData.segundoApellido || "",
         dpi: formData.dpi || 0,
-        nit: formData.nit || 0,
+        fecha_Nacimiento: fechaNacimiento || new Date(),
         correo: formData.correo || "",
         telefono: formData.telefono || "",
         direccion: formData.direccion || "",
-        // Convertir de string a number si existe, sino null
-        empresaId: formData.empresaId  ||  null,
       };
 
-      const response = await updateCliente(updateData);
+      const response = await updateContacto(updateData);
 
       if (response.success && response.data) {
         // Actualizar el estado del cliente
@@ -136,7 +166,7 @@ const ClienteDetalle: React.FC = () => {
         
         // Obtener el ID de empresa de manera consistente
         // La respuesta puede ser ClienteBy o ClienteCompleto, manejamos ambos casos
-        const empresaId = (response.data as any).EmpresaDto?.id || (response.data as any).empresaId?.id;
+        const empresaId = (response.data as any).empresaDto?.id || (response.data as any).proveedorId?.id;
         
         // Actualizar formData con los datos devueltos del servidor
         setFormData({
@@ -146,12 +176,10 @@ const ClienteDetalle: React.FC = () => {
           primerApellido: response.data.primerApellido,
           segundoApellido: response.data.segundoApellido,
           dpi: response.data.dpi,
-          nit: response.data.nit,
+          fecha_Nacimiento: response.data.fecha_Nacimiento,
           correo: response.data.correo,
           direccion: response.data.direccion,
           telefono: response.data.telefono,
-          // Convertir a string para consistencia
-          empresaId: empresaId ? empresaId.toString() : null,
         });
 
         // Actualizar empresa actual
@@ -166,11 +194,11 @@ const ClienteDetalle: React.FC = () => {
         
         // Si no hay empresaId pero formData.empresaId tiene un valor, 
         // significa que se seleccionó una empresa pero no se guardó correctamente
-        if (!empresaId && formData.empresaId) {
+        if (!empresaId) {
           // Buscar la empresa por el ID del formData
           const empresaResponse = await getProveedores();
           if (empresaResponse.success && empresaResponse.data) {
-            const empresaSeleccionada = empresaResponse.data.find(e => e.id.toString() === formData.empresaId);
+            const empresaSeleccionada = empresaResponse.data.find(e => e.id.toString() === empresaId);
             if (empresaSeleccionada) {
               setEmpresaActual(empresaSeleccionada.name);
             }
@@ -195,9 +223,9 @@ const ClienteDetalle: React.FC = () => {
     if (!id) return;
     setDeleting(true);
 
-    const response: ServiceResponse<any> = await deleteCliente(id);
+    const response: ServiceResponse<any> = await deleteContacto(id);
     if (response.success) {
-      navigate('/home/clientes', { state: { message: 'Cliente eliminado exitosamente' } });
+      navigate('/home/contactos', { state: { message: 'Cliente eliminado exitosamente' } });
       toast.success('Cliente eliminado exitosamente');
     } else if (response.error) {
       setError(response.error.error.message);
@@ -231,7 +259,7 @@ const ClienteDetalle: React.FC = () => {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
           <div className="flex items-center">
-            <Link to="/home/clientes" className="mr-4 text-gray-400 hover:text-gray-600 transition-colors">
+            <Link to="/home/contactos" className="mr-4 text-gray-400 hover:text-gray-600 transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
@@ -363,14 +391,38 @@ const ClienteDetalle: React.FC = () => {
 
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
-                    NIT <span className="text-red-500">*</span>
+                    Fecha de Nacimiento <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="number"
-                    value={formData.nit || ''}
-                    onChange={e => handleChange('nit', parseInt(e.target.value) || 0)}
+                    type="date"
+                    value={(() => {
+                      if (!formData.fecha_Nacimiento) return '';
+                      
+                      // Si ya es un objeto Date
+                      if (formData.fecha_Nacimiento instanceof Date) {
+                        return formData.fecha_Nacimiento.toISOString().split('T')[0];
+                      }
+                      
+                      // Si es una string (viene del backend)
+                      if (typeof formData.fecha_Nacimiento === 'string') {
+                        try {
+                          const date = new Date(formData.fecha_Nacimiento);
+                          if (!isNaN(date.getTime())) {
+                            return date.toISOString().split('T')[0];
+                          }
+                        } catch (error) {
+                          console.error('Error parsing date:', error);
+                        }
+                      }
+                      
+                      return '';
+                    })()}
+                    onChange={e => {
+                      const selectedDate = e.target.value ? new Date(e.target.value) : null;
+                      handleChange('fecha_Nacimiento', selectedDate);
+                    }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400"
-                    placeholder="Ingresa el número de NIT"
+                    placeholder="Selecciona la fecha de nacimiento"
                   />
                 </div>
               </div>
@@ -446,31 +498,7 @@ const ClienteDetalle: React.FC = () => {
                     </div>
                   )}
                   
-                  <div className="flex items-center space-x-2">
-                    <select
-                      value={formData.empresaId || ''}
-                      onChange={e => handleChange('empresaId', e.target.value || null)}
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
-                    >
-                      <option value="">Selecciona una empresa</option>
-                      {empresas.map((empresa) => (
-                        <option key={empresa.id} value={empresa.id.toString()}>
-                          {empresa.name}
-                        </option>
-                      ))}
-                    </select>
-
-                    {formData.empresaId && (
-                      <button
-                        type="button"
-                        onClick={() => handleChange('empresaId', null)}
-                        className="px-3 py-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-lg transition"
-                        title="Quitar empresa"
-                      >
-                        <XMarkIcon className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
+                 
                   
                   <p className="text-sm text-gray-500">
                     {empresaActual 

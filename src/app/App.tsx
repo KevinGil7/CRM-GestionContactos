@@ -5,13 +5,13 @@ import { useEffect } from 'react';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRouter';
 import Login from '../@auth/services/pages/Login';
-import ClienteAll from './features/clientes/pages/ClienteAll';
-import ClienteDetalle from './features/clientes/pages/ClienteDetalle';
-import CrearCliente from './features/clientes/pages/CrearCliente';
+import ContactoAll from './features/contactos/pages/ContactoAll';
+import ContactoDetalle from './features/contactos/pages/ContactoDetalle';
+import CrearContacto from './features/contactos/pages/CrearContacto';
 import Inicio from './pages/Inicio';
-import ProveedorAll from './features/empresas/pages/ProveedorAll';
-import ProveedorDetalle from './features/empresas/pages/ProveedorDetalle';
-import CrearProveedor from './features/empresas/pages/CrearProveedor';
+import ProveedorAll from './features/provedores/pages/ProveedorAll';
+import ProveedorDetalle from './features/provedores/pages/ProveedorDetalle';
+import CrearProveedor from './features/provedores/pages/CrearProveedor';
 import { Toaster } from "react-hot-toast";
 import useAuth from '@fuse/core/FuseAuthProvider/useAuth';
 
@@ -56,9 +56,9 @@ function AppRoutes() {
         </PrivateRoute>
         }>
         <Route index element={<Inicio />} />
-        <Route path="clientes" element={<ClienteAll />} />
-        <Route path="clientes/crear" element={<CrearCliente />} />
-        <Route path="clientes/:id" element={<ClienteDetalle />} />
+        <Route path="contactos" element={<ContactoAll />} />
+        <Route path="contactos/crear" element={<CrearContacto />} />
+        <Route path="contactos/:id" element={<ContactoDetalle />} />
         <Route path="proveedores" element={<ProveedorAll />} />
         <Route path="proveedores/:id" element={<ProveedorDetalle />} />
         <Route path="proveedores/crear" element={<CrearProveedor />} />

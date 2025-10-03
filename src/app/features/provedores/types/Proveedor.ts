@@ -1,4 +1,4 @@
-import { Contacto } from "@app/features/clientes/types/Contacto";
+import { Contacto } from "@app/features/contactos/types/Contacto";
 
 export interface Proveedor{
     id :string;
