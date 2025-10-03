@@ -49,7 +49,7 @@ export default function Inicio() {
       {/* <div
         className="absolute inset-0 z-0 opacity-10"
         style={{
-          backgroundImage: `url(${logo})`,
+          backgroundImage: `url(/img/Logo_F.png)`,
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center 30%',
           backgroundSize: '33%',

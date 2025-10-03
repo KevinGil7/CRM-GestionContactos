@@ -27,7 +27,7 @@ function AppRoutes() {
   useEffect(() => {
     const path = location.pathname;
     if (path === '/') {
-      document.documentElement.className = 'h-full bg-gray-900'; // fondo para login
+      document.documentElement.className = 'h-full login-bg'; // fondo para login
     } else {
       document.documentElement.className = ''; // limpio para home u otras
     }

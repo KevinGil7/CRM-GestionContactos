@@ -66,13 +66,31 @@ function JwtSignInForm() {
 				throw new Error('Invalid response data');
 			}
 
+			// Extract roles from JWT token
+			let userRoles = ['Administrator']; // Default role
+			try {
+				const tokenParts = data.token.split('.');
+				if (tokenParts.length === 3) {
+					const payload = tokenParts[1];
+					const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
+					const decodedPayload = atob(paddedPayload);
+					const payloadObj = JSON.parse(decodedPayload);
+					userRoles = payloadObj['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || ['Administrator'];
+					console.log('JwtSignInForm - Extracted roles from token:', userRoles);
+				}
+			} catch (error) {
+				console.error('Error decoding JWT token:', error);
+			}
+
 			// Store the token with the correct key
 			localStorage.setItem('jwt_access_token', data.token);
 			
-			// Store user data for immediate use
+			// Store user data for immediate use (including roles)
 			localStorage.setItem('user_id', data.id);
 			localStorage.setItem('user_email', data.email);
 			localStorage.setItem('user_username', data.username);
+			localStorage.setItem('user_roles', JSON.stringify(userRoles));
+			console.log('JwtSignInForm - Stored roles in localStorage:', JSON.stringify(userRoles));
 			
 			// Reload the page to trigger the auth flow
 			window.location.href = '/home';

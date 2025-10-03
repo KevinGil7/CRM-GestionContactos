@@ -1,3 +1,7 @@
+import { createPreferencia } from "@app/features/preferencia/types/createPreferencia";
+import { CreatePerfilSocial } from "@app/features/perfilessocial/types/createPerfilSocial";
+import { createInteracion } from "@app/features/interaccion/types/createInteracion";
+
 export interface CreateContacto {
      primerNombre: string;
      segundoNombre: string;
@@ -7,7 +11,10 @@ export interface CreateContacto {
      telefono: string;
      direccion: string;
      correo: string;
-     fecha_Nacimiento: Date;
+     fecha_Nacimiento: string;
+     preferencia ?: createPreferencia;
+     perfilSocial ?: CreatePerfilSocial;
+     interacciones ?: createInteracion;
 }
 
 export interface UpdateContacto{

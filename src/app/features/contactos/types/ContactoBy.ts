@@ -1,3 +1,6 @@
+import { interaccionAll } from "@app/features/interaccion/types/interaccionAll";
+import { PerfilSocialAll } from "@app/features/perfilessocial/types/perfilsocialAll";
+import { preferenciaAll } from "@app/features/preferencia/types/preferenciaAll";
 import { ProveedorBy } from "@app/features/provedores/types/ProveedorBy";
 
 export interface ContactoBy{
@@ -12,5 +15,8 @@ export interface ContactoBy{
      estado:boolean;
      direccion: string;
      fecha_Nacimiento: Date;
-     proveedorId : ProveedorBy
+     proveedorId : ProveedorBy;
+     preferencia : preferenciaAll;
+     perfilesSociales : PerfilSocialAll[];
+     interacciones : interaccionAll[];
 }

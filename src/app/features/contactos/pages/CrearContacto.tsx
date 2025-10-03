@@ -1,69 +1,92 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { createContacto, ServiceResponse } from '../services/Contacto.service';
 import { CreateContacto } from '../types/CreateContacto';
-import { getProveedores } from '../../provedores/services/proveedor.service';
-import { Proveedor } from '../../provedores/types/Proveedor';
 import { toast } from 'react-hot-toast';
+import { Tabs, TabPanel } from '../components/Tabs';
+import PersonalInfoTab from '../components/PersonalInfoTab';
+import SocialProfilesTab from '../components/SocialProfilesTab';
+import PreferencesTab from '../components/PreferencesTab';
+import InteraccionesTab from '../components/InteraccionesTab';
 
 const CrearCliente: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [empresas, setEmpresas] = useState<Proveedor[]>([]);
-  const [perteneceEmpresa, setPerteneceEmpresa] = useState(false);
+  const [activeTab, setActiveTab] = useState('personal');
   const [formData, setFormData] = useState<CreateContacto>({
     primerNombre: '',
     segundoNombre: '',
     primerApellido: '',
     segundoApellido: '',
     dpi: 0,
-    fecha_Nacimiento: new Date(),
+    fecha_Nacimiento: '',
     telefono: '',
     direccion: '',
     correo: '',
+    preferencia: {
+      metodoPreferido: '',
+      horarioDe: new Date(),
+      horarioa: new Date(),
+      noContactar: false
+    },
+    perfilSocial: {
+      nameSocial: '',
+      usuario: '',  
+      url: ''
+    },
+    interacciones: {
+      tipo: '',
+      asunto: '',
+      notas: ''
+    }
   });
 
-  useEffect(() => {
-    loadEmpresas();
-  }, []);
 
-  const loadEmpresas = async () => {
-    try {
-      const response = await getProveedores();
-      if (response.success && response.data) {
-        setEmpresas(response.data);
-      } else if (response.error) {
-        toast.error('Error al cargar empresas: ' + response.error.error.message);
-      }
-    } catch (err) {
-      console.error('Error al cargar empresas:', err);
-      toast.error('Error al cargar empresas');
-    }
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     
-    if (name === 'empresaId') {
-      // Si se selecciona "Sin empresa", establecer null
-      const empresaId = value === '' ? null : value;
-      setFormData(prev => ({ ...prev, [name]: empresaId }));
-    } else {
       setFormData(prev => ({
         ...prev,
         [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
       }));
-    }
   };
 
-  const handleToggleEmpresa = (pertenece: boolean) => {
-    setPerteneceEmpresa(pertenece);
-    if (!pertenece) {
-      // Si no pertenece a empresa, limpiar el campo
-      setFormData(prev => ({ ...prev, empresaId: null }));
-    }
+  // Handler para campos anidados de preferencias
+  const handlePreferenciaChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      preferencia: {
+        ...prev.preferencia!,
+        [field]: value
+      }
+    }));
   };
+
+  // Handler para campos anidados de perfiles sociales
+  const handlePerfilSocialChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      perfilSocial: {
+        ...prev.perfilSocial!,
+        [field]: value
+      }
+    }));
+  };
+
+  // Handler para campos anidados de interacciones
+  const handleInteraccionChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      interacciones: {
+        ...prev.interacciones!,
+        [field]: value
+      }
+    }));
+  };
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,19 +94,76 @@ const CrearCliente: React.FC = () => {
     setError(null);
 
     try {
-      const response: ServiceResponse<any> = await createContacto(formData);
+      // Preparar los datos para enviar, excluyendo ContactoId y campos vacíos
+      const dataToSend: any = {
+        primerNombre: formData.primerNombre,
+        segundoNombre: formData.segundoNombre,
+        primerApellido: formData.primerApellido,
+        segundoApellido: formData.segundoApellido,
+        dpi: formData.dpi,
+        telefono: formData.telefono,
+        direccion: formData.direccion,
+        correo: formData.correo,
+        fecha_Nacimiento: formData.fecha_Nacimiento
+      };
+
+      // Solo agregar preferencias si tiene datos
+      if (formData.preferencia && (
+        formData.preferencia.metodoPreferido.trim() !== '' ||
+        formData.preferencia.horarioDe ||
+        formData.preferencia.horarioa ||
+        formData.preferencia.noContactar
+      )) {
+        dataToSend.preferencia = {
+          metodoPreferido: formData.preferencia.metodoPreferido,
+          horarioDe: formData.preferencia.horarioDe,
+          horarioa: formData.preferencia.horarioa,
+          noContactar: formData.preferencia.noContactar
+          // No incluir ContactoId
+        };
+      }
+
+      // Solo agregar perfiles sociales si tiene datos
+      if (formData.perfilSocial && (
+        formData.perfilSocial.nameSocial.trim() !== '' ||
+        formData.perfilSocial.usuario.trim() !== '' ||
+        formData.perfilSocial.url.trim() !== ''
+      )) {
+        dataToSend.perfilSocial = {
+          nameSocial: formData.perfilSocial.nameSocial,
+          usuario: formData.perfilSocial.usuario,
+          url: formData.perfilSocial.url
+          // No incluir ContactoId
+        };
+      }
+
+      // Solo agregar interacciones si tiene datos
+      if (formData.interacciones && (
+        formData.interacciones.tipo.trim() !== '' ||
+        formData.interacciones.asunto.trim() !== '' ||
+        formData.interacciones.notas.trim() !== ''
+      )) {
+        dataToSend.interacciones = {
+          tipo: formData.interacciones.tipo,
+          asunto: formData.interacciones.asunto,
+          notas: formData.interacciones.notas
+          // No incluir ContactoId
+        };
+      }
+
+      const response: ServiceResponse<any> = await createContacto(dataToSend);
 
       if (response.success) {
-        toast.success('Cliente creado exitosamente');
-        navigate('/home/clientes', { 
-          state: { message: 'Cliente creado exitosamente' }
+        toast.success('Contacto creado exitosamente');
+        navigate('/home/contactos', { 
+          state: { message: 'Contacto creado exitosamente' }
         });
       } else if (response.error) {
         setError(response.error.error.message);
         toast.error(response.error.error.message);
       }
     } catch (err) {
-      console.error('Error al crear cliente:', err);
+      console.error('Error al crear contacto:', err);
       setError('Ocurrió un error inesperado al crear el contacto');
       toast.error('Ocurrió un error inesperado al crear el contacto');
     } finally {
@@ -96,18 +176,25 @@ const CrearCliente: React.FC = () => {
       formData.primerNombre.trim() !== '' &&
       formData.primerApellido.trim() !== '' &&
       formData.dpi !== 0 &&
-      formData.fecha_Nacimiento !== new Date() &&
+      formData.fecha_Nacimiento.trim() !== '' &&
       formData.telefono.trim() !== '' &&
       formData.correo.trim() !== '' &&
       formData.direccion.trim() !== ''
     );
   };
 
+  const getPageTitle = () => {
+    if (formData.primerNombre.trim() && formData.primerApellido.trim()) {
+      return `${formData.primerNombre} ${formData.primerApellido}`;
+    }
+    return 'Crear Nuevo Contacto';
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <Link
@@ -119,254 +206,131 @@ const CrearCliente: React.FC = () => {
                 </svg>
               </Link>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Crear Nuevo Contacto</h1>
-                <p className="mt-1 text-sm text-gray-500">Completa la información del cliente</p>
+                <h1 className="text-3xl font-bold text-gray-900">{getPageTitle()}</h1>
+                <p className="mt-1 text-sm text-gray-500">Completa la información del contacto</p>
               </div>
             </div>
+            
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={!isFormValid() || loading}
+              className={`py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                isFormValid() && !loading
+                  ? 'bg-blue-600 hover:bg-blue-700'
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Creando...
+                </div>
+              ) : (
+                'Crear Contacto'
+              )}
+            </button>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white shadow rounded-lg">
-          <form onSubmit={handleSubmit} className="space-y-6 p-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-4 m-6 mb-0">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">Error al crear contacto</h3>
+                  <div className="mt-2 text-sm text-red-700">
+                    <p>{error}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="p-6 pt-0">
+            <Tabs
+              tabs={[
+                {
+                  id: 'personal',
+                  label: 'Información Personal',
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">Error al crear contacto</h3>
-                    <div className="mt-2 text-sm text-red-700">
-                      <p>{error}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Información Personal */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Información Personal</h3>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="primerNombre" className="block text-sm font-medium text-gray-700">
-                    Primer Nombre *
-                  </label>
-                  <input
-                    type="text"
-                    name="primerNombre"
-                    id="primerNombre"
-                    required
-                    value={formData.primerNombre}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="segundoNombre" className="block text-sm font-medium text-gray-700">
-                    Segundo Nombre
-                  </label>
-                  <input
-                    type="text"
-                    name="segundoNombre"
-                    id="segundoNombre"
-                    value={formData.segundoNombre}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="primerApellido" className="block text-sm font-medium text-gray-700">
-                    Primer Apellido *
-                  </label>
-                  <input
-                    type="text"
-                    name="primerApellido"
-                    id="primerApellido"
-                    required
-                    value={formData.primerApellido}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="segundoApellido" className="block text-sm font-medium text-gray-700">
-                    Segundo Apellido
-                  </label>
-                  <input
-                    type="text"
-                    name="segundoApellido"
-                    id="segundoApellido"
-                    value={formData.segundoApellido}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="dpi" className="block text-sm font-medium text-gray-700">
-                    DPI *
-                  </label>
-                  <input
-                    type="text"
-                    name="dpi"
-                    id="dpi"
-                    required
-                    value={formData.dpi}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="fecha_Nacimiento" className="block text-sm font-medium text-gray-700">
-                    Nit *
-                  </label>
-                  <input
-                    type="date"
-                    name="fecha_Nacimiento"
-                    id="fecha_Nacimiento"
-                    required
-                    value={formData.fecha_Nacimiento.toISOString().split('T')[0]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Información de Contacto */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Información de Contacto</h3>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
-                    Teléfono *
-                  </label>
-                  <input
-                    type="tel"
-                    name="telefono"
-                    id="telefono"
-                    required
-                    value={formData.telefono}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="correo" className="block text-sm font-medium text-gray-700">
-                    Correo Electrónico *
-                  </label>
-                  <input
-                    type="email"
-                    name="correo"
-                    id="correo"
-                    required
-                    value={formData.correo}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <label htmlFor="direccion" className="block text-sm font-medium text-gray-700">
-                    Dirección *
-                  </label>
-                  <input
-                    type="text"
-                    name="direccion"
-                    id="direccion"
-                    required
-                    value={formData.direccion}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Información de Empresa */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Información de Empresa</h3>
-              
-              {/* Toggle para preguntar si pertenece a empresa */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  ¿El cliente pertenece a una empresa?
-                </label>
-                <div className="flex space-x-4">
-                  <button
-                    type="button"
-                    onClick={() => handleToggleEmpresa(true)}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                      perteneceEmpresa
-                        ? 'bg-blue-600 text-white shadow-md cursor-default'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer'
-                    }`}
-                  >
-                    Sí, pertenece a una empresa
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleToggleEmpresa(false)}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                      !perteneceEmpresa
-                        ? 'bg-gray-600 text-white shadow-md cursor-default'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer'
-                    }`}
-                  >
-                    No, es cliente independiente
-                  </button>
-                </div>
-              </div>
-
-              {/* Selector de empresa (solo visible si pertenece a empresa) */}
-             
-
-              {/* Mensaje cuando no pertenece a empresa */}
-              {!perteneceEmpresa && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center">
-                    <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  )
+                },
+                {
+                  id: 'social',
+                  label: 'Perfil Social',
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-10 0a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2m0 0V4a1 1 0 00-1-1H8a1 1 0 00-1 1v2" />
                     </svg>
-                    <span className="text-sm text-gray-600">
-                      El cliente será registrado como cliente independiente sin empresa asignada
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
+                  )
+                },
+                {
+                  id: 'preferences',
+                  label: 'Preferencias',
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  )
+                },
+                {
+                  id: 'interacciones',
+                  label: 'Interacción',
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  )
+                }
+              ]}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            >
+              <TabPanel isActive={activeTab === 'personal'}>
+                <PersonalInfoTab
+                  formData={formData}
+                  onInputChange={handleInputChange}
+                />
+              </TabPanel>
 
-            {/* Botones */}
-            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-              <Link
-                to="/home/contactos"
-                className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Cancelar
-              </Link>
-              
-                {loading ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Creando...
-                  </div>
-                ) : (
-                  'Crear Contacto'
-                )}
-              
-            </div>
-          </form>
+              <TabPanel isActive={activeTab === 'social'}>
+                <SocialProfilesTab
+                  perfilSocial={formData.perfilSocial!}
+                  onPerfilSocialChange={handlePerfilSocialChange}
+                />
+              </TabPanel>
+
+              <TabPanel isActive={activeTab === 'preferences'}>
+                <PreferencesTab
+                  preferencia={formData.preferencia!}
+                  onPreferenciaChange={handlePreferenciaChange}
+                />
+              </TabPanel>
+
+              <TabPanel isActive={activeTab === 'interacciones'}>
+                <InteraccionesTab
+                  interacciones={formData.interacciones!}
+                  onInteraccionChange={handleInteraccionChange}
+                />
+              </TabPanel>
+            </Tabs>
+          </div>
         </div>  
       </div>
+
     </div>
   );
 };

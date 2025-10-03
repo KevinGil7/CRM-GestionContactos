@@ -9,6 +9,13 @@
   animation: rotation 1s linear infinite;
 }
 
+.login-bg {
+  background-image: url('/img/Fondo_Login.png');
+  background-size: cover;
+  background-position: center;
+}
+
+
 @keyframes rotation {
   0% {
       transform: rotate(0deg);

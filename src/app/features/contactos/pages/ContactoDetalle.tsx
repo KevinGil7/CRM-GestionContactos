@@ -5,8 +5,11 @@ import { ContactoCompleto } from '../types/ContactoCompleto';
 import { ContactoBy } from '../types/ContactoBy';
 import { ConfirmModal } from "../../../components/ui/ConfirmModalProps";
 import { UpdateContacto } from '../types/CreateContacto';
-import { getProveedores, getProveedorBy } from '../../provedores/services/proveedor.service';
-import { Proveedor } from '../../provedores/types/Proveedor';
+import { Tabs, TabPanel } from '../components/Tabs';
+import PersonalInfoViewTab from '../components/PersonalInfoViewTab';
+import SocialProfilesViewTab from '../components/SocialProfilesViewTab';
+import PreferencesViewTab from '../components/PreferencesViewTab';
+import InteractionsViewTab from '../components/InteractionsViewTab';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import {toast} from 'react-hot-toast';
@@ -14,30 +17,21 @@ import {toast} from 'react-hot-toast';
 const ClienteDetalle: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [cliente, setCliente] = useState<ContactoCompleto | null>(null);
+  const [cliente, setCliente] = useState<ContactoBy | null>(null);
   const [formData, setFormData] = useState<Partial<UpdateContacto>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [empresas, setEmpresas] = useState<Proveedor[]>([]);
-  const [empresaActual, setEmpresaActual] = useState<string>('');
+  const [activeTab, setActiveTab] = useState('personal');
   
 
   useEffect(() => {
     if (id) {
       loadCliente();
-      loadEmpresas();
     }
   }, [id]);
-
-  const loadEmpresas = async () => {
-    const response = await getProveedores();
-    if (response.success && response.data) {
-      setEmpresas(response.data);
-    }
-  };
 
   const loadCliente = async () => {
     if (!id) return;
@@ -47,19 +41,7 @@ const ClienteDetalle: React.FC = () => {
     const response: ServiceResponse<ContactoBy> = await getContactoById(id);
 
     if (response.success && response.data) {
-      setCliente(response.data as unknown as ContactoCompleto);
-      console.log(response.data);
-      
-      // Obtener el ID de empresa de manera consistente
-      const empresaId = response.data.proveedorId?.id ;
-      
-      // Cargar información de la empresa actual
-      if (empresaId) {
-        const empresaResponse = await getProveedorBy(empresaId);
-        if (empresaResponse.success && empresaResponse.data) {
-          setEmpresaActual(empresaResponse.data.name);
-        }
-      }
+      setCliente(response.data);
 
       setFormData({
         id: response.data.id,
@@ -161,51 +143,10 @@ const ClienteDetalle: React.FC = () => {
       const response = await updateContacto(updateData);
 
       if (response.success && response.data) {
-        // Actualizar el estado del cliente
-        setCliente(response.data);
+        // Recargar datos completos del contacto para mantener consistencia
+        await loadCliente();
         
-        // Obtener el ID de empresa de manera consistente
-        // La respuesta puede ser ClienteBy o ClienteCompleto, manejamos ambos casos
-        const empresaId = (response.data as any).empresaDto?.id || (response.data as any).proveedorId?.id;
-        
-        // Actualizar formData con los datos devueltos del servidor
-        setFormData({
-          id: response.data.id,
-          primerNombre: response.data.primerNombre,
-          segundoNombre: response.data.segundoNombre,
-          primerApellido: response.data.primerApellido,
-          segundoApellido: response.data.segundoApellido,
-          dpi: response.data.dpi,
-          fecha_Nacimiento: response.data.fecha_Nacimiento,
-          correo: response.data.correo,
-          direccion: response.data.direccion,
-          telefono: response.data.telefono,
-        });
-
-        // Actualizar empresa actual
-        if (empresaId) {
-          const empresaResponse = await getProveedorBy(empresaId);
-          if (empresaResponse.success && empresaResponse.data) {
-            setEmpresaActual(empresaResponse.data.name);
-          }
-        } else {
-          setEmpresaActual('');
-        }
-        
-        // Si no hay empresaId pero formData.empresaId tiene un valor, 
-        // significa que se seleccionó una empresa pero no se guardó correctamente
-        if (!empresaId) {
-          // Buscar la empresa por el ID del formData
-          const empresaResponse = await getProveedores();
-          if (empresaResponse.success && empresaResponse.data) {
-            const empresaSeleccionada = empresaResponse.data.find(e => e.id.toString() === empresaId);
-            if (empresaSeleccionada) {
-              setEmpresaActual(empresaSeleccionada.name);
-            }
-          }
-        }
-        
-        toast.success('Cliente actualizado exitosamente');
+        toast.success('Contacto actualizado exitosamente');
       } else if (response.error) {
         setError(response.error.error.message);
         toast.error(response.error.error.message);
@@ -225,8 +166,8 @@ const ClienteDetalle: React.FC = () => {
 
     const response: ServiceResponse<any> = await deleteContacto(id);
     if (response.success) {
-      navigate('/home/contactos', { state: { message: 'Cliente eliminado exitosamente' } });
-      toast.success('Cliente eliminado exitosamente');
+      navigate('/home/contactos', { state: { message: 'Contacto eliminado exitosamente' } });
+      toast.success('Contacto eliminado exitosamente');
     } else if (response.error) {
       setError(response.error.error.message);
       setShowDeleteModal(false);
@@ -252,12 +193,12 @@ const ClienteDetalle: React.FC = () => {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
   if (error) return <div className="min-h-screen flex items-center justify-center">Error: {error}</div>;
-  if (!cliente) return <div className="min-h-screen flex items-center justify-center">Cliente no encontrado</div>;
+  if (!cliente) return <div className="min-h-screen flex items-center justify-center">Contacto no encontrado</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50" style={{ position: 'relative' }}>
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
+        <div className="px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
           <div className="flex items-center">
             <Link to="/home/contactos" className="mr-4 text-gray-400 hover:text-gray-600 transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -308,207 +249,85 @@ const ClienteDetalle: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white shadow-xl rounded-xl overflow-hidden">
-          {/* Header del formulario */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-800">Información del Cliente</h2>
-            <p className="text-gray-600 mt-1">Edita la información personal y de contacto del cliente</p>
-          </div>
+          <div className="p-6">
+            <Tabs
+              tabs={[
+                {
+                  id: 'personal',
+                  label: 'Información Personal',
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  )
+                },
+                {
+                  id: 'social',
+                  label: 'Perfiles Sociales',
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-10 0a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2m0 0V4a1 1 0 00-1-1H8a1 1 0 00-1 1v2" />
+                    </svg>
+                  )
+                },
+                {
+                  id: 'preferences',
+                  label: 'Preferencias',
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  )
+                },
+                {
+                  id: 'interactions',
+                  label: 'Interacciones',
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  )
+                }
+              ]}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            >
+              <TabPanel isActive={activeTab === 'personal'}>
+                <PersonalInfoViewTab
+                  formData={formData}
+                  onInputChange={handleChange}
+                  hasChanges={hasChanges()}
+                  saving={saving}
+                />
+              </TabPanel>
 
-          <div className="p-6 space-y-8">
-            {/* Información Personal */}
-            <div className="space-y-6">
-              <div className="flex items-center space-x-2">
-                <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
-                <h3 className="text-lg font-semibold text-gray-900">Información Personal</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Primer Nombre <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.primerNombre || ''}
-                    onChange={e => handleChange('primerNombre', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400"
-                    placeholder="Ingresa el primer nombre"
-                  />
-                </div>
+              <TabPanel isActive={activeTab === 'social'}>
+                <SocialProfilesViewTab
+                  perfilesSociales={cliente.perfilesSociales || []}
+                  contactoId={cliente.id}
+                  onRefresh={loadCliente}
+                />
+              </TabPanel>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Segundo Nombre
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.segundoNombre || ''}
-                    onChange={e => handleChange('segundoNombre', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400"
-                    placeholder="Ingresa el segundo nombre (opcional)"
-                  />
-                </div>
+              <TabPanel isActive={activeTab === 'preferences'}>
+                <PreferencesViewTab
+                  preferencia={cliente.preferencia || null}
+                  contactoId={cliente.id}
+                  onRefresh={loadCliente}
+                />
+              </TabPanel>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Primer Apellido <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.primerApellido || ''}
-                    onChange={e => handleChange('primerApellido', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400"
-                    placeholder="Ingresa el primer apellido"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Segundo Apellido
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.segundoApellido || ''}
-                    onChange={e => handleChange('segundoApellido', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400"
-                    placeholder="Ingresa el segundo apellido (opcional)"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    DPI <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.dpi || ''}
-                    onChange={e => handleChange('dpi', parseInt(e.target.value) || 0)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400"
-                    placeholder="Ingresa el número de DPI"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Fecha de Nacimiento <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={(() => {
-                      if (!formData.fecha_Nacimiento) return '';
-                      
-                      // Si ya es un objeto Date
-                      if (formData.fecha_Nacimiento instanceof Date) {
-                        return formData.fecha_Nacimiento.toISOString().split('T')[0];
-                      }
-                      
-                      // Si es una string (viene del backend)
-                      if (typeof formData.fecha_Nacimiento === 'string') {
-                        try {
-                          const date = new Date(formData.fecha_Nacimiento);
-                          if (!isNaN(date.getTime())) {
-                            return date.toISOString().split('T')[0];
-                          }
-                        } catch (error) {
-                          console.error('Error parsing date:', error);
-                        }
-                      }
-                      
-                      return '';
-                    })()}
-                    onChange={e => {
-                      const selectedDate = e.target.value ? new Date(e.target.value) : null;
-                      handleChange('fecha_Nacimiento', selectedDate);
-                    }}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400"
-                    placeholder="Selecciona la fecha de nacimiento"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Información de Contacto */}
-            <div className="space-y-6">
-              <div className="flex items-center space-x-2">
-                <div className="w-1 h-6 bg-green-500 rounded-full"></div>
-                <h3 className="text-lg font-semibold text-gray-900">Información de Contacto</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Correo Electrónico <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.correo || ''}
-                    onChange={e => handleChange('correo', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400"
-                    placeholder="ejemplo@correo.com"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Teléfono <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.telefono || ''}
-                    onChange={e => handleChange('telefono', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400"
-                    placeholder="Ingresa el número de teléfono"
-                  />
-                </div>
-
-                <div className="space-y-2 md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Dirección <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.direccion || ''}
-                    onChange={e => handleChange('direccion', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400"
-                    placeholder="Ingresa la dirección completa"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Información de Empresa */}
-            <div className="space-y-6">
-              <div className="flex items-center space-x-2">
-                <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
-                <h3 className="text-lg font-semibold text-gray-900">Información de Empresa</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Empresa Asignada
-                  </label>
-                  
-                  {/* Mostrar empresa actual si existe */}
-                  {empresaActual && (
-                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-3">
-                      <h4 className="text-sm font-medium text-purple-800 mb-2">
-                        Empresa Actualmente Asignada:
-                      </h4>
-                      <p className="text-purple-600 font-medium">{empresaActual}</p>
-                    </div>
-                  )}
-                  
-                 
-                  
-                  <p className="text-sm text-gray-500">
-                    {empresaActual 
-                      ? 'Selecciona una empresa diferente o quita la asignación actual'
-                      : 'Asigna este cliente a una empresa específica'
-                    }
-                  </p>
-                </div>
-              </div>
-            </div>
+              <TabPanel isActive={activeTab === 'interactions'}>
+                <InteractionsViewTab
+                  interacciones={cliente.interacciones || []}
+                  contactoId={cliente.id}
+                  onRefresh={loadCliente}
+                />
+              </TabPanel>
+            </Tabs>
           </div>
         </div>
       </div>
@@ -518,7 +337,7 @@ const ClienteDetalle: React.FC = () => {
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
         title="Confirmar eliminación"
-        message="¿Estás seguro de que quieres eliminar este cliente? Esta acción no se puede deshacer."
+        message="¿Estás seguro de que quieres eliminar este contacto? Esta acción no se puede deshacer."
         confirmText={deleting ? "Eliminando..." : "Eliminar"}
         cancelText="Cancelar"
       />

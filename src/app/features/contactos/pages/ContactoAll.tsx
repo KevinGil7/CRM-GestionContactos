@@ -58,7 +58,7 @@ const ClienteAll: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando clientes...</p>
+          <p className="mt-4 text-gray-600">Cargando Contactos...</p>
         </div>
       </div>
     );
@@ -75,7 +75,7 @@ const ClienteAll: React.FC = () => {
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-lg font-medium text-gray-900">Error al cargar clientes</h3>
+              <h3 className="text-lg font-medium text-gray-900">Error al cargar contactos</h3>
               <p className="mt-1 text-sm text-gray-500">{error}</p>
             </div>
           </div>
@@ -99,9 +99,9 @@ const ClienteAll: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Gestión de Clientes</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Gestión de Contactos</h1>
               <p className="mt-1 text-sm text-gray-500">
-                Administra y visualiza todos los clientes registrados
+                Administra y visualiza todos los contactos registrados
               </p>
             </div>
                          <Link
@@ -111,7 +111,7 @@ const ClienteAll: React.FC = () => {
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              Nuevo Cliente
+              Nuevo Contacto
             </Link>
           </div>
         </div>
@@ -123,7 +123,7 @@ const ClienteAll: React.FC = () => {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div className="flex-1 max-w-lg">
-              <label htmlFor="search" className="sr-only">Buscar clientes</label>
+              <label htmlFor="search" className="sr-only">Buscar contactos</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,7 +143,7 @@ const ClienteAll: React.FC = () => {
             <div className="mt-4 sm:mt-0 sm:ml-4">
               <div className="bg-white rounded-lg shadow px-4 py-3">
                 <p className="text-sm text-gray-500">
-                  Total de clientes: <span className="font-semibold text-gray-900">{filteredClientes.length}</span>
+                  Total de contactos: <span className="font-semibold text-gray-900">{filteredClientes.length}</span>
                 </p>
               </div>
             </div>
@@ -157,10 +157,10 @@ const ClienteAll: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">
-              {searchTerm ? 'No se encontraron clientes' : 'No hay clientes'}
+              {searchTerm ? 'No se encontraron contactos' : 'No hay contactos'}
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              {searchTerm ? 'Intenta con otros términos de búsqueda.' : 'Comienza creando tu primer cliente.'}
+              {searchTerm ? 'Intenta con otros términos de búsqueda.' : 'Comienza creando tu primer contacto.'}
             </p>
                          {!searchTerm && (
                <div className="mt-6">
@@ -171,7 +171,7 @@ const ClienteAll: React.FC = () => {
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
-                  Crear Cliente
+                  Crear Contacto
                 </Link>
               </div>
             )}
