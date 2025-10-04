@@ -32,7 +32,7 @@ const ProveedorDetalle: React.FC = () => {
 
         if (empresaResponse.success && empresaResponse.data) {
           setEmpresa(empresaResponse.data);
-          setClientePrincipalId(empresaResponse.data.ContactoPrincipalDto?.id || null);
+          setClientePrincipalId(empresaResponse.data.contactoPrincipalDto?.id || null);
         }
 
         if (clientesResponse.success && clientesResponse.data) {
@@ -106,7 +106,7 @@ const ProveedorDetalle: React.FC = () => {
   };
 
   // Obtener información del cliente principal actual
-  const clientePrincipalActual = empresa.ContactoPrincipalDto;
+  const clientePrincipalActual = empresa.contactoPrincipalDto;
   const clienteSeleccionado = clientes.find(c => c.id === clientePrincipalId);
 
   return (

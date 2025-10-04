@@ -229,7 +229,7 @@ const InteractionsViewTab: React.FC<InteractionsViewTabProps> = ({
                         {tiposInteraccion.find(t => t.value === interaction.tipo)?.label || interaction.tipo}
                       </h4>
                       <span className="text-xs text-gray-500">
-                        {formatDate(interaction.createdAt)}
+                        {formatDate(interaction.updatedAt)}
                       </span>
                     </div>
                     <p className="text-sm font-medium text-gray-800 mt-1">{interaction.asunto}</p>

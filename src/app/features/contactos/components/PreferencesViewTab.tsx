@@ -4,8 +4,6 @@ import { createPreferencia, updatePreferencia } from '../../preferencia/types/cr
 import { PostPerfilContacto, UpdatePerfilContacto, DeletePerfilContacto } from '../../preferencia/service/preferencia.service';
 import { toast } from 'react-hot-toast';
 import Modal from './Modal';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 
 interface PreferencesViewTabProps {
   preferencia: preferenciaAll | null;
@@ -22,8 +20,8 @@ const PreferencesViewTab: React.FC<PreferencesViewTabProps> = ({
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<createPreferencia>({
     metodoPreferido: '',
-    horarioDe: new Date(),
-    horarioa: new Date(),
+    horarioDe: '09:00:00',
+    horarioa: '17:00:00',
     noContactar: false
   });
 
@@ -39,15 +37,15 @@ const PreferencesViewTab: React.FC<PreferencesViewTabProps> = ({
     if (preferencia) {
       setFormData({
         metodoPreferido: preferencia.metodoPreferido,
-        horarioDe: new Date(preferencia.horarioDe),
-        horarioa: new Date(preferencia.horarioa),
+        horarioDe: preferencia.horarioDe,
+        horarioa: preferencia.horarioa,
         noContactar: preferencia.noContactar
       });
     } else {
       setFormData({
         metodoPreferido: '',
-        horarioDe: new Date(),
-        horarioa: new Date(),
+        horarioDe: '09:00:00',
+        horarioa: '17:00:00',
         noContactar: false
       });
     }
@@ -132,11 +130,15 @@ const PreferencesViewTab: React.FC<PreferencesViewTabProps> = ({
     }
   };
 
-  const formatTime = (date: Date) => {
-    return new Date(date).toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
+  const formatTime = (timeString: string) => {
+    if (!timeString) return '--:--';
+    
+    try {
+      const [hours, minutes] = timeString.split(':');
+      return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    } catch (error) {
+      return '--:--';
+    }
   };
 
   const formatDate = (date: Date) => {
@@ -170,7 +172,7 @@ const PreferencesViewTab: React.FC<PreferencesViewTabProps> = ({
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
-            {preferencia ? 'Editar' : 'Crear'} Preferencias
+            {preferencia ? 'Editar' : 'Crear'} Preferencia
           </button>
         </div>
       </div>
@@ -226,7 +228,7 @@ const PreferencesViewTab: React.FC<PreferencesViewTabProps> = ({
       <Modal
         isOpen={showModal}
         onClose={handleCloseModal}
-        title={preferencia ? 'Editar Preferencias' : 'Crear Preferencias'}
+        title={preferencia ? 'Editar Preferencia' : 'Crear Preferencia'}
         size="md"
       >
         <div className="space-y-4">
@@ -252,20 +254,14 @@ const PreferencesViewTab: React.FC<PreferencesViewTabProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Horario de Contacto - Desde
             </label>
-            <DatePicker
-              selected={formData.horarioDe}
-              onChange={(date: Date | null) => {
-                if (date) {
-                  setFormData(prev => ({ ...prev, horarioDe: date }));
-                }
+            <input
+              type="time"
+              value={formData.horarioDe.substring(0, 5)}
+              onChange={(e) => {
+                const timeValue = e.target.value + ':00'; // Agregar segundos para formato TimeSpan
+                setFormData(prev => ({ ...prev, horarioDe: timeValue }));
               }}
-              showTimeSelect
-              showTimeSelectOnly
-              timeIntervals={15}
-              timeCaption="Hora"
-              dateFormat="HH:mm"
               className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholderText="Seleccionar hora"
             />
           </div>
 
@@ -273,20 +269,14 @@ const PreferencesViewTab: React.FC<PreferencesViewTabProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Horario de Contacto - Hasta
             </label>
-            <DatePicker
-              selected={formData.horarioa}
-              onChange={(date: Date | null) => {
-                if (date) {
-                  setFormData(prev => ({ ...prev, horarioa: date }));
-                }
+            <input
+              type="time"
+              value={formData.horarioa.substring(0, 5)}
+              onChange={(e) => {
+                const timeValue = e.target.value + ':00'; // Agregar segundos para formato TimeSpan
+                setFormData(prev => ({ ...prev, horarioa: timeValue }));
               }}
-              showTimeSelect
-              showTimeSelectOnly
-              timeIntervals={15}
-              timeCaption="Hora"
-              dateFormat="HH:mm"
               className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholderText="Seleccionar hora"
             />
           </div>
 

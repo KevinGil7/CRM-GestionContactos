@@ -1,12 +1,10 @@
 import React from 'react';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 
 interface PreferencesTabProps {
   preferencia: {
     metodoPreferido: string;
-    horarioDe: Date;
-    horarioa: Date;
+    horarioDe: string;
+    horarioa: string;
     noContactar: boolean;
   };
   onPreferenciaChange: (field: string, value: any) => void;
@@ -53,20 +51,15 @@ const PreferencesTab: React.FC<PreferencesTabProps> = ({
         <label htmlFor="HorarioDe" className="block text-sm font-medium text-gray-700">
           Horario de Contacto - Desde
         </label>
-        <DatePicker
-          selected={preferencia.horarioDe}
-          onChange={(date: Date | null) => {
-            if (date) {
-              onPreferenciaChange('horarioDe', date);
-            }
+        <input
+          type="time"
+          id="HorarioDe"
+          value={preferencia.horarioDe ? preferencia.horarioDe.substring(0, 5) : '09:00'}
+          onChange={(e) => {
+            const timeValue = e.target.value + ':00'; // Agregar segundos para formato TimeSpan
+            onPreferenciaChange('horarioDe', timeValue);
           }}
-          showTimeSelect
-          showTimeSelectOnly
-          timeIntervals={15}
-          timeCaption="Hora"
-          dateFormat="HH:mm"
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          placeholderText="Seleccionar hora"
         />
       </div>
 
@@ -75,20 +68,15 @@ const PreferencesTab: React.FC<PreferencesTabProps> = ({
         <label htmlFor="Horarioa" className="block text-sm font-medium text-gray-700">
           Horario de Contacto - Hasta
         </label>
-        <DatePicker
-          selected={preferencia.horarioa}
-          onChange={(date: Date | null) => {
-            if (date) {
-              onPreferenciaChange('horarioa', date);
-            }
+        <input
+          type="time"
+          id="Horarioa"
+          value={preferencia.horarioa ? preferencia.horarioa.substring(0, 5) : '17:00'}
+          onChange={(e) => {
+            const timeValue = e.target.value + ':00'; // Agregar segundos para formato TimeSpan
+            onPreferenciaChange('horarioa', timeValue);
           }}
-          showTimeSelect
-          showTimeSelectOnly
-          timeIntervals={15}
-          timeCaption="Hora"
-          dateFormat="HH:mm"
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          placeholderText="Seleccionar hora"
         />
       </div>
 

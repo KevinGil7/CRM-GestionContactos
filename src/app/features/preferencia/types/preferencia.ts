@@ -2,8 +2,8 @@ export interface preferencia{
      id : string;
     contactoId : string;
     metodoPreferido : string;
-    horarioDe : Date;
-    horarioa : Date;
+    horarioDe : string;
+    horarioa : string;
     noContactar : boolean;
     createAt : Date;
     updateAt : Date;

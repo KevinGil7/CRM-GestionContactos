@@ -6,5 +6,5 @@ export interface Proveedor{
      email :string;
      phone :string;
      isActive :boolean;
-     ContactoPrincipalDto: Contacto
+     contactoPrincipalDto: Contacto
 }

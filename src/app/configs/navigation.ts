@@ -5,7 +5,10 @@ import { FileDown, HandCoins, HandshakeIcon, PiggyBank, ChartNoAxesCombined    }
 export const navigation = [
   { name: 'Home', href: '/home', icon: HomeIcon, current: true, roles: ['User', 'Administrator'] },
   { name: 'Contactos', href: '/home/contactos', icon: UsersIcon, current: false, roles: ['User', 'Administrator'] },
+  { name: 'Clientes', href: '/home/clientes', icon: UsersIcon, current: false, roles: ['User', 'Administrator'] },
   { name: 'Proveedores', href: '/home/proveedores', icon: BuildingOffice2Icon, current: false, roles: ['User', 'Administrator'] },
+  { name: 'Interacciones', href: '/home/interaccion', icon: HandshakeIcon, current: false, roles: ['User', 'Administrator'] },
+  
  
   {
     name: 'Administración',

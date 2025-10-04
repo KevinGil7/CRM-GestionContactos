@@ -14,6 +14,12 @@ import ProveedorDetalle from './features/provedores/pages/ProveedorDetalle';
 import CrearProveedor from './features/provedores/pages/CrearProveedor';
 import { Toaster } from "react-hot-toast";
 import useAuth from '@fuse/core/FuseAuthProvider/useAuth';
+import CrearCliente from './features/clientes/pages/CrearCliente';
+import ClienteAll from './features/clientes/pages/ClienteAll';
+import ClienteDetalle from './features/clientes/pages/ClienteDetalle';
+import InteraccionAll from './features/interaccion/pages/interaccionall';
+import InteraccionDetalle from './features/interaccion/pages/InteraccionDetalle';
+import CrearInteraccion from './features/interaccion/pages/crearinteraccion';
 
 
 
@@ -62,6 +68,12 @@ function AppRoutes() {
         <Route path="proveedores" element={<ProveedorAll />} />
         <Route path="proveedores/:id" element={<ProveedorDetalle />} />
         <Route path="proveedores/crear" element={<CrearProveedor />} />
+        <Route path="clientes" element={<ClienteAll />} />
+        <Route path="clientes/crear" element={<CrearCliente />} />
+        <Route path="clientes/:id" element={<ClienteDetalle />} />
+        <Route path="interaccion" element={<InteraccionAll />} />
+        <Route path="interaccion/crear" element={<CrearInteraccion />} />
+        <Route path="interaccion/:id" element={<InteraccionDetalle />} />
       </Route>
       {/* Catch all route - redirect to home if authenticated, otherwise to login */}
       <Route 

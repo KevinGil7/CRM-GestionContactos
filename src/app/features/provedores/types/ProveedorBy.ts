@@ -6,5 +6,5 @@ export interface ProveedorBy{
     name :string;
      email :string;
      phone :string;
-     ContactoPrincipalDto? : Contacto;
+     contactoPrincipalDto? : Contacto;
 }

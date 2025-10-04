@@ -26,15 +26,17 @@ const CrearCliente: React.FC = () => {
     correo: '',
     preferencia: {
       metodoPreferido: '',
-      horarioDe: new Date(),
-      horarioa: new Date(),
+      horarioDe: '09:00:00',
+      horarioa: '17:00:00',
       noContactar: false
     },
-    perfilSocial: {
-      nameSocial: '',
-      usuario: '',  
-      url: ''
-    },
+    perfilSocial: [
+      {
+        nameSocial: '',
+        usuario: '',  
+        url: ''
+      }
+    ],
     interacciones: {
       tipo: '',
       asunto: '',
@@ -65,13 +67,35 @@ const CrearCliente: React.FC = () => {
   };
 
   // Handler para campos anidados de perfiles sociales
-  const handlePerfilSocialChange = (field: string, value: string) => {
+  const handlePerfilSocialChange = (index: number, field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      perfilSocial: {
+      perfilSocial: prev.perfilSocial!.map((perfil, i) => 
+        i === index ? { ...perfil, [field]: value } : perfil
+      )
+    }));
+  };
+
+  // Función para agregar un nuevo perfil social
+  const addPerfilSocial = () => {
+    setFormData(prev => ({
+      ...prev,
+      perfilSocial: [
         ...prev.perfilSocial!,
-        [field]: value
-      }
+        {
+          nameSocial: '',
+          usuario: '',
+          url: ''
+        }
+      ]
+    }));
+  };
+
+  // Función para eliminar un perfil social
+  const removePerfilSocial = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      perfilSocial: prev.perfilSocial!.filter((_, i) => i !== index)
     }));
   };
 
@@ -94,6 +118,19 @@ const CrearCliente: React.FC = () => {
     setError(null);
 
     try {
+      // Validar horarios de preferencias si existen
+      if (formData.preferencia && formData.preferencia.horarioDe && formData.preferencia.horarioa) {
+        const fromTime = formData.preferencia.horarioDe;
+        const toTime = formData.preferencia.horarioa;
+        
+        // Comparar horarios (formato HH:mm:ss)
+        if (fromTime >= toTime) {
+          setError('El horario "Hasta" debe ser posterior al horario "Desde" en las preferencias');
+          setLoading(false);
+          return;
+        }
+      }
+
       // Preparar los datos para enviar, excluyendo ContactoId y campos vacíos
       const dataToSend: any = {
         primerNombre: formData.primerNombre,
@@ -124,17 +161,16 @@ const CrearCliente: React.FC = () => {
       }
 
       // Solo agregar perfiles sociales si tiene datos
-      if (formData.perfilSocial && (
-        formData.perfilSocial.nameSocial.trim() !== '' ||
-        formData.perfilSocial.usuario.trim() !== '' ||
-        formData.perfilSocial.url.trim() !== ''
-      )) {
-        dataToSend.perfilSocial = {
-          nameSocial: formData.perfilSocial.nameSocial,
-          usuario: formData.perfilSocial.usuario,
-          url: formData.perfilSocial.url
-          // No incluir ContactoId
-        };
+      if (formData.perfilSocial && formData.perfilSocial.length > 0) {
+        const perfilesConDatos = formData.perfilSocial.filter(perfil => 
+          perfil.nameSocial.trim() !== '' ||
+          perfil.usuario.trim() !== '' ||
+          perfil.url.trim() !== ''
+        );
+        
+        if (perfilesConDatos.length > 0) {
+          dataToSend.perfilSocial = perfilesConDatos;
+        }
       }
 
       // Solo agregar interacciones si tiene datos
@@ -308,8 +344,10 @@ const CrearCliente: React.FC = () => {
 
               <TabPanel isActive={activeTab === 'social'}>
                 <SocialProfilesTab
-                  perfilSocial={formData.perfilSocial!}
-                  onPerfilSocialChange={handlePerfilSocialChange}
+                  perfilesSociales={formData.perfilSocial!}
+                  onPerfilSocialChange={(index, field, value) => handlePerfilSocialChange(index, field, value)}
+                  onAddPerfilSocial={addPerfilSocial}
+                  onRemovePerfilSocial={removePerfilSocial}
                 />
               </TabPanel>
 

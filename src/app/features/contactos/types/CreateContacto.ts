@@ -13,7 +13,7 @@ export interface CreateContacto {
      correo: string;
      fecha_Nacimiento: string;
      preferencia ?: createPreferencia;
-     perfilSocial ?: CreatePerfilSocial;
+     perfilSocial ?: CreatePerfilSocial[];
      interacciones ?: createInteracion;
 }
 

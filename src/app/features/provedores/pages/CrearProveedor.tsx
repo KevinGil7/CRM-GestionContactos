@@ -82,7 +82,7 @@ const CrearProveedor: React.FC = () => {
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <Link
-                to="/home/empresas"
+                to="/home/proveedores"
                 className="mr-4 p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md"
               >
                 <ArrowLeft className="w-5 h-5" />
