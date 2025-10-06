@@ -1,6 +1,6 @@
 // src/config/navigation.ts
 import { HomeIcon, UsersIcon, BuildingOffice2Icon, Cog6ToothIcon    } from '@heroicons/react/24/outline';
-import { FileDown, HandCoins, HandshakeIcon, PiggyBank, ChartNoAxesCombined    } from "lucide-react";
+import { FileDown, HandCoins, HandshakeIcon, PiggyBank, ChartNoAxesCombined, CalendarIcon    } from "lucide-react";
 
 export const navigation = [
   { name: 'Home', href: '/home', icon: HomeIcon, current: true, roles: ['User', 'Administrator'] },
@@ -8,7 +8,7 @@ export const navigation = [
   { name: 'Clientes', href: '/home/clientes', icon: UsersIcon, current: false, roles: ['User', 'Administrator'] },
   { name: 'Proveedores', href: '/home/proveedores', icon: BuildingOffice2Icon, current: false, roles: ['User', 'Administrator'] },
   { name: 'Interacciones', href: '/home/interaccion', icon: HandshakeIcon, current: false, roles: ['User', 'Administrator'] },
-  
+  { name: 'Calendario', href: '/home/calendario', icon: CalendarIcon, current: false, roles: ['User', 'Administrator'] },
  
   {
     name: 'Administración',

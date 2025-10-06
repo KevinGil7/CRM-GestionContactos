@@ -20,7 +20,7 @@ import ClienteDetalle from './features/clientes/pages/ClienteDetalle';
 import InteraccionAll from './features/interaccion/pages/interaccionall';
 import InteraccionDetalle from './features/interaccion/pages/InteraccionDetalle';
 import CrearInteraccion from './features/interaccion/pages/crearinteraccion';
-
+import CalendarioAll from './features/calendario/pages/calendario';
 
 
 function AppRoutes() {
@@ -74,6 +74,7 @@ function AppRoutes() {
         <Route path="interaccion" element={<InteraccionAll />} />
         <Route path="interaccion/crear" element={<CrearInteraccion />} />
         <Route path="interaccion/:id" element={<InteraccionDetalle />} />
+        <Route path="calendario" element={<CalendarioAll />} />
       </Route>
       {/* Catch all route - redirect to home if authenticated, otherwise to login */}
       <Route 

@@ -71,14 +71,9 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 					const userUsername = localStorage.getItem('user_username');
 					const userRoles = localStorage.getItem('user_roles');
 
-					console.log('Auto-login - userId:', userId);
-					console.log('Auto-login - userEmail:', userEmail);
-					console.log('Auto-login - userUsername:', userUsername);
-					console.log('Auto-login - userRoles:', userRoles);
 
 					if (!userId || !userEmail || !userUsername) {
 						// If no user data in localStorage, try to get it from the token
-						console.log('Auto-login - No user data in localStorage, decoding token');
 						const tokenParts = accessToken.split('.');
 						if (tokenParts.length === 3) {
 							const payload = tokenParts[1];
@@ -86,10 +81,8 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 							const decodedPayload = atob(paddedPayload);
 							const payloadObj = JSON.parse(decodedPayload);
 
-							console.log('Auto-login - Decoded token payload:', payloadObj);
 
 							const rolesFromToken = payloadObj['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || ['Administrator'];
-							console.log('Auto-login - Roles from token:', rolesFromToken);
 
 							const userData = {
 								id: payloadObj.uid || 'unknown',
@@ -107,7 +100,6 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 							localStorage.setItem('user_email', payloadObj.email || '');
 							localStorage.setItem('user_username', payloadObj.sub || 'Usuario');
 							localStorage.setItem('user_roles', JSON.stringify(rolesFromToken));
-							console.log('Auto-login - Stored user data in localStorage');
 
 							setTokenStorageValue(accessToken);
 							setGlobalHeaders({ Authorization: `Bearer ${accessToken}` });
@@ -196,7 +188,6 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 						const decodedPayload = atob(paddedPayload);
 						const payloadObj = JSON.parse(decodedPayload);
 						userRoles = payloadObj['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || ['Administrator'];
-						console.log('JWT Provider - Extracted roles from token:', userRoles);
 					}
 				} catch (error) {
 					console.error('Error decoding JWT token:', error);
@@ -207,7 +198,6 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 				localStorage.setItem('user_email', data.email);
 				localStorage.setItem('user_username', data.username);
 				localStorage.setItem('user_roles', JSON.stringify(userRoles));
-				console.log('JWT Provider - Stored roles in localStorage:', JSON.stringify(userRoles));
 
 				// Extract user data from your API response format
 				const userData = {

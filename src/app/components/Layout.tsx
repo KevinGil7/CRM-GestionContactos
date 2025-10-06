@@ -58,9 +58,6 @@ useEffect(() => {
   const storedRoles = localStorage.getItem("user_roles");
   const storedToken = localStorage.getItem("jwt_access_token");
   
-  console.log('Layout useEffect - storedNombre:', storedNombre);
-  console.log('Layout useEffect - storedRoles:', storedRoles);
-  console.log('Layout useEffect - storedToken:', storedToken ? 'Token exists' : 'No token');
   
   // Si no hay roles pero hay token, intentar decodificar el token
   if (!storedRoles && storedToken) {
@@ -72,7 +69,6 @@ useEffect(() => {
         const decodedPayload = atob(paddedPayload);
         const payloadObj = JSON.parse(decodedPayload);
         const rolesFromToken = payloadObj['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || ['Administrator'];
-        console.log('Layout useEffect - Decoded roles from token:', rolesFromToken);
         
         // Guardar los roles en localStorage
         localStorage.setItem('user_roles', JSON.stringify(rolesFromToken));
@@ -89,7 +85,6 @@ useEffect(() => {
   if (storedRoles) {
     try {
       const rolesArray = JSON.parse(storedRoles);
-      console.log('Layout useEffect - rolesArray:', rolesArray);
       
       // Priorizar Administrator si está presente, sino tomar el primer rol
       let selectedRole = "User";
@@ -99,14 +94,12 @@ useEffect(() => {
         selectedRole = rolesArray[0];
       }
       
-      console.log('Layout useEffect - setting rol to:', selectedRole);
       setRol(selectedRole);
     } catch (error) {
       console.error('Layout useEffect - error parsing roles:', error);
       setRol("User");
     }
   } else {
-    console.log('Layout useEffect - no storedRoles found, setting default User');
     setRol("User");
   }
 }, []);
