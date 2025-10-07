@@ -15,7 +15,7 @@ export const navigation = [
     icon: Cog6ToothIcon,
     roles: ['Administrator'],
     children: [
-      { name: 'Usuarios', href: '/home/admin/usuarios' },
+      { name: 'Usuarios', href: '/home/admin/users' },
     ],
   },
 ];

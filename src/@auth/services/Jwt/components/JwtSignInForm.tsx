@@ -12,6 +12,7 @@ import useAuth from '@fuse/core/FuseAuthProvider/useAuth';
 import { JwtSignInPayload } from '../JwtAuthProvider';
 import { handleErrorToast } from '@app/utils/handleErrorToast';
 import { authSignIn } from '@auth/authApi';
+import { Link } from 'react-router-dom';
 
 const schema = z.object({
 	email: z.string().email('You must enter a valid email').nonempty('You must enter an email'),
@@ -117,7 +118,7 @@ function JwtSignInForm() {
 		<form
 			name="loginForm"
 			noValidate
-			className="mt-8 flex w-full flex-col justify-center"
+			className="flex w-full flex-col justify-center space-y-5"
 			onSubmit={handleSubmit(onSubmit)}
 		>
 			<Controller
@@ -128,31 +129,30 @@ function JwtSignInForm() {
 						{...field}
 						sx={{
 							'& .MuiOutlinedInput-input': {
-								color: 'white', // texto dentro del input
+								color: 'white',
 							},
 							'& .MuiInputLabel-root': {
-								color: 'white', // label normal
+								color: 'rgba(255, 255, 255, 0.8)',
 							},
 							'& .MuiInputLabel-root.Mui-focused': {
-								color: 'white', // label en foco
+								color: 'white',
 							},
 							'& .MuiOutlinedInput-root': {
-								backgroundColor: 'rgba(255, 255, 255, 0.1)', // fondo translúcido
+								backgroundColor: 'rgba(255, 255, 255, 0.1)',
 								'& fieldset': {
-									borderColor: 'white', // borde normal
+									borderColor: 'rgba(255, 255, 255, 0.3)',
 								},
 								'&:hover fieldset': {
-									borderColor: 'white', // borde al pasar el mouse
+									borderColor: 'rgba(255, 255, 255, 0.5)',
 								},
 								'&.Mui-focused fieldset': {
-									borderColor: 'white', // borde en foco
+									borderColor: 'white',
 								},
 							},
 							'& .MuiFormHelperText-root': {
-								color: 'white', // color del helper text
+								color: 'rgba(255, 255, 255, 0.7)',
 							},
 						}}
-						className="mb-6"
 						label="Correo electrónico"
 						autoFocus
 						type="email"
@@ -173,31 +173,30 @@ function JwtSignInForm() {
 						{...field}
 						sx={{
 							'& .MuiOutlinedInput-input': {
-								color: 'white', // texto dentro del input
+								color: 'white',
 							},
 							'& .MuiInputLabel-root': {
-								color: 'white', // label normal
+								color: 'rgba(255, 255, 255, 0.8)',
 							},
 							'& .MuiInputLabel-root.Mui-focused': {
-								color: 'white', // label en foco
+								color: 'white',
 							},
 							'& .MuiOutlinedInput-root': {
-								backgroundColor: 'rgba(255, 255, 255, 0.1)', // fondo translúcido
+								backgroundColor: 'rgba(255, 255, 255, 0.1)',
 								'& fieldset': {
-									borderColor: 'white', // borde normal
+									borderColor: 'rgba(255, 255, 255, 0.3)',
 								},
 								'&:hover fieldset': {
-									borderColor: 'white', // borde al pasar el mouse
+									borderColor: 'rgba(255, 255, 255, 0.5)',
 								},
 								'&.Mui-focused fieldset': {
-									borderColor: 'white', // borde en foco
+									borderColor: 'white',
 								},
 							},
 							'& .MuiFormHelperText-root': {
-								color: 'white', // color del helper text
+								color: 'rgba(255, 255, 255, 0.7)',
 							},
 						}}
-						className="mb-6"
 						label="Contraseña"
 						type="password"
 						error={!!errors.password}
@@ -209,36 +208,71 @@ function JwtSignInForm() {
 				)}
 			/>
 
-			<div className="flex flex-col items-center justify-center sm:flex-row sm:justify-between">
+			<div className="flex flex-col sm:flex-row items-center justify-between">
 				<Controller
 					name="remember"
 					control={control}
 					render={({ field }) => (
 						<FormControl>
 							<FormControlLabel
-								label="Recuerdame"
+								label={<span className="text-white text-sm">Recuérdame</span>}
 								control={
 									<Checkbox
 										size="small"
 										{...field}
+										sx={{
+											color: 'rgba(255, 255, 255, 0.7)',
+											'&.Mui-checked': {
+												color: 'white',
+											},
+										}}
 									/>
 								}
 							/>
 						</FormControl>
 					)}
 				/>
+				<Link
+					to="/forgot-password"
+					className="text-sm text-gray-300 hover:text-white transition-colors"
+				>
+					¿Olvidaste tu contraseña?
+				</Link>
 			</div>
 
 			<Button
 				variant="contained"
-				color="secondary"
-				className=" mt-4 w-full border-2 border-secondary text-white hover:bg-secondary/90"
-				aria-label="Sign in"
-				disabled={_.isEmpty(dirtyFields) || !isValid || isLoading}
-				type="submit"
+				fullWidth
 				size="large"
+				type="submit"
+				disabled={_.isEmpty(dirtyFields) || !isValid || isLoading}
+				sx={{
+					backgroundColor: '#3b82f6',
+					'&:hover': {
+						backgroundColor: '#2563eb',
+					},
+					'&:disabled': {
+						backgroundColor: 'rgba(59, 130, 246, 0.5)',
+						color: 'rgba(255, 255, 255, 0.5)',
+					},
+					textTransform: 'none',
+					fontSize: '1rem',
+					fontWeight: 600,
+					py: 1.5,
+					boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+				}}
 			>
-				{isLoading ? 'Cargando...' : 'Iniciar sesión'}
+				{isLoading ? (
+					<div className="flex items-center gap-2">
+						<svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+							<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+							<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						</svg>
+						Iniciando sesión...
+					</div>
+				) : (
+					'Iniciar sesión'
+				)}
 			</Button>
 		</form>
 	);

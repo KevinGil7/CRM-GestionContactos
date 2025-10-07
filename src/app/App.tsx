@@ -21,6 +21,12 @@ import InteraccionAll from './features/interaccion/pages/interaccionall';
 import InteraccionDetalle from './features/interaccion/pages/InteraccionDetalle';
 import CrearInteraccion from './features/interaccion/pages/crearinteraccion';
 import CalendarioAll from './features/calendario/pages/calendario';
+import UsersAll from './features/users/pages/UsersAll';
+import UserDetalle from './features/users/pages/UserDetalle';
+import RegisterUser from './features/users/pages/registerUser';
+import ForgotPassword from '../@auth/services/pages/ForgotPassword';
+import VerifyCode from '../@auth/services/pages/VerifyCode';
+import ResetPassword from '../@auth/services/pages/ResetPassword';
 
 
 function AppRoutes() {
@@ -32,7 +38,7 @@ function AppRoutes() {
 
   useEffect(() => {
     const path = location.pathname;
-    if (path === '/') {
+    if (path === '/' || path === '/forgot-password' || path === '/verify-code' || path === '/reset-password') {
       document.documentElement.className = 'h-full login-bg'; // fondo para login
     } else {
       document.documentElement.className = ''; // limpio para home u otras
@@ -56,6 +62,24 @@ function AppRoutes() {
           isAuthenticated ? <Navigate to="/home" replace /> : <Login />
         } 
       />
+      <Route 
+        path="/forgot-password" 
+        element={
+          isAuthenticated ? <Navigate to="/home" replace /> : <ForgotPassword />
+        } 
+      />
+      <Route 
+        path="/verify-code" 
+        element={
+          isAuthenticated ? <Navigate to="/home" replace /> : <VerifyCode />
+        } 
+      />
+      <Route 
+        path="/reset-password" 
+        element={
+          isAuthenticated ? <Navigate to="/home" replace /> : <ResetPassword />
+        } 
+      />
       <Route path="/home" element={
         <PrivateRoute>
           <Layout hideSidebar={location.pathname === '/home' || location.pathname === '/home/'} />
@@ -75,6 +99,9 @@ function AppRoutes() {
         <Route path="interaccion/crear" element={<CrearInteraccion />} />
         <Route path="interaccion/:id" element={<InteraccionDetalle />} />
         <Route path="calendario" element={<CalendarioAll />} />
+        <Route path="admin/users" element={<UsersAll />} />
+        <Route path="admin/users/crear" element={<RegisterUser />} />
+        <Route path="admin/users/:id" element={<UserDetalle />} />
       </Route>
       {/* Catch all route - redirect to home if authenticated, otherwise to login */}
       <Route 
